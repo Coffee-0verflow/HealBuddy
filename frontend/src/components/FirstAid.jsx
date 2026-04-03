@@ -25,8 +25,7 @@ function GuideDetail({ guide, onBack }) {
           <ol className="space-y-4">
             {guide.steps.map((step, i) => (
               <li key={i} className="flex gap-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center mt-0.5"
-                  style={{ background: '#dbeafe', color: '#1d4ed8' }}>{i + 1}</span>
+                <span className="flex-shrink-0 w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center mt-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">{i + 1}</span>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{step}</p>
               </li>
             ))}
@@ -34,11 +33,11 @@ function GuideDetail({ guide, onBack }) {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-2xl p-5" style={{ background: '#fff1f2', border: '1px solid #fecdd3' }}>
+          <div className="rounded-2xl p-5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50">
             <p className="text-xs font-semibold uppercase tracking-widest text-red-500 mb-3">⚠️ Do Not</p>
             <ul className="space-y-2.5">
               {guide.doNot.map((item, i) => (
-                <li key={i} className="flex gap-2.5 text-sm text-red-700">
+                <li key={i} className="flex gap-2.5 text-sm text-red-700 dark:text-red-400">
                   <span className="flex-shrink-0 font-bold mt-0.5">✗</span>
                   <span>{item}</span>
                 </li>
@@ -46,9 +45,9 @@ function GuideDetail({ guide, onBack }) {
             </ul>
           </div>
 
-          <div className="rounded-2xl p-5" style={{ background: '#fff7ed', border: '1px solid #fed7aa' }}>
+          <div className="rounded-2xl p-5 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50">
             <p className="text-xs font-semibold uppercase tracking-widest text-orange-500 mb-2">🏥 When to Escalate</p>
-            <p className="text-sm text-orange-800 leading-relaxed">{guide.escalate}</p>
+            <p className="text-sm text-orange-800 dark:text-orange-300 leading-relaxed">{guide.escalate}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
