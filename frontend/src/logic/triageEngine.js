@@ -1,6 +1,7 @@
 import { symptomRules, urgencyConfig } from '../data/symptomRules';
 
 const URGENCY_ORDER = ["emergency", "hospital", "specialist", "clinic", "pharmacy", "self_care"];
+export const PHARMACY_URGENCIES = new Set(["pharmacy", "self_care"]);
 
 export function runTriage(symptomId, answers) {
   const symptom = symptomRules.find(s => s.id === symptomId);
@@ -20,6 +21,7 @@ export function runTriage(symptomId, answers) {
 
   const urgency = matchedRule?.urgency || "clinic";
   const config = urgencyConfig[urgency];
+  const showPharmacyMode = !redFlagTriggered && PHARMACY_URGENCIES.has(urgency);
 
   return {
     symptom,
@@ -28,7 +30,8 @@ export function runTriage(symptomId, answers) {
     rationale: matchedRule?.rationale || "Based on your symptoms, a clinical evaluation is recommended.",
     redFlagTriggered,
     specialties: symptom.specialties,
-    isEmergency: urgency === "emergency" || redFlagTriggered
+    isEmergency: urgency === "emergency" || redFlagTriggered,
+    showPharmacyMode,
   };
 }
 

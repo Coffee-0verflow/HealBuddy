@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { doctors } from '../data/doctors';
+import { pharmacies } from '../data/pharmacies';
 import { getCurrentLocation, getDistanceInKm } from '../logic/distance';
 
 // State mapping by ID range
@@ -119,7 +120,7 @@ function StarRating({ rating }) {
   );
 }
 
-export default function MapScreen({ onBack, requiredDoctorType }) {
+export default function MapScreen({ onBack, requiredDoctorType, showPharmacies = false }) {
   const [userLocation, setUserLocation] = useState(null);
   const [nearbyDocs, setNearbyDocs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -136,6 +137,17 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
     if (selectedState === 'All States') return doctorsWithState;
     return doctorsWithState.filter(d => d.state === selectedState);
   }, [selectedState]);
+
+  const [showAllPharmacies, setShowAllPharmacies] = useState(false);
+
+  const nearbyPharmacies = useMemo(() => {
+    if (!userLocation || !showPharmacies) return [];
+    return pharmacies
+      .map(p => ({ ...p, distance: getDistanceInKm(userLocation.lat, userLocation.lng, p.lat, p.lng) }))
+      .sort((a, b) => a.distance - b.distance);
+  }, [userLocation, showPharmacies]);
+
+  const visiblePharmacies = showAllPharmacies ? nearbyPharmacies : nearbyPharmacies.slice(0, 5);
 
   const processDoctors = (userLoc) => {
     setUserLocation(userLoc);
@@ -204,6 +216,29 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
     } catch {
       setRouteCoords([[userLocation.lat, userLocation.lng], [doc.lat, doc.lng]]);
       setRouteInfo({ name: doc.name, distance: doc.distance.toFixed(1), duration: Math.ceil(doc.distance / 40 * 60) });
+    } finally {
+      setRouteLoading(false);
+    }
+  };
+
+  const handlePharmacyNavigate = async (pharmacy) => {
+    if (!userLocation) return;
+    setRouteLoading(true);
+    setMapExpanded(true);
+    const distKm = getDistanceInKm(userLocation.lat, userLocation.lng, pharmacy.lat, pharmacy.lng);
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${pharmacy.lng},${pharmacy.lat}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.code === 'Ok' && data.routes?.length > 0) {
+        const route = data.routes[0];
+        const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        setRouteCoords(coords);
+        setRouteInfo({ name: pharmacy.name, distance: (route.distance / 1000).toFixed(1), duration: Math.ceil(route.duration / 60) });
+      } else throw new Error('No route');
+    } catch {
+      setRouteCoords([[userLocation.lat, userLocation.lng], [pharmacy.lat, pharmacy.lng]]);
+      setRouteInfo({ name: pharmacy.name, distance: distKm.toFixed(1), duration: Math.ceil(distKm / 30 * 60) });
     } finally {
       setRouteLoading(false);
     }
@@ -299,6 +334,24 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
                       <span className="text-xs">{getDistanceInKm(userLocation.lat, userLocation.lng, doc.lat, doc.lng).toFixed(1)} km • ⭐ {doc.rating}</span><br/>
                       <span className="text-xs text-slate-500">{doc.specialty}</span><br/>
                       {doc.phone && <a href={`tel:${doc.phone.replace(/ /g,'')}`} style={{color:'#4f46e5',fontWeight:'bold',fontSize:'11px'}}>📞 Call</a>}
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+
+              {/* Pharmacy markers — sorted nearest first */}
+              {showPharmacies && nearbyPharmacies.map((p, i) => (
+                <Marker key={p.id} position={[p.lat, p.lng]} icon={L.divIcon({
+                  html: `<div style="background:#059669;color:#fff;border:2px solid #fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(5,150,105,0.5);cursor:pointer">💊</div>`,
+                  className: '', iconSize: [28, 28], iconAnchor: [14, 14]
+                })}>
+                  <Popup>
+                    <div style={{ minWidth: '150px' }}>
+                      <span style={{fontWeight:700,color:'#059669',fontSize:13}}>💊 {p.name}</span><br/>
+                      <span style={{fontSize:11}}>{p.distance.toFixed(1)} km • ⭐ {p.rating}</span><br/>
+                      <span style={{fontSize:11,color:'#64748b'}}>{p.open24x7 ? '🟢 Open 24×7' : '⏰ Check Hours'}</span><br/>
+                      {i === 0 && <span style={{fontSize:10,fontWeight:700,color:'#059669',background:'#d1fae5',padding:'1px 6px',borderRadius:99,display:'inline-block',marginTop:3}}>Closest</span>}<br/>
+                      {p.phone && <button onClick={() => handlePharmacyNavigate(p)} style={{marginTop:6,width:'100%',padding:'5px 0',background:'#059669',color:'#fff',border:'none',borderRadius:6,fontSize:11,fontWeight:700,cursor:'pointer'}}>🧭 Navigate</button>}
                     </div>
                   </Popup>
                 </Marker>
@@ -451,6 +504,119 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
                 </div>
               ))}
             </div>
+
+            {/* Pharmacy Cards — identical layout to hospital cards */}
+            {showPharmacies && nearbyPharmacies.length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-black">💊</div>
+                  <h3 className="font-black text-lg text-slate-800 dark:text-slate-100">Nearby Pharmacies</h3>
+                  <span className="text-[9px] font-black uppercase tracking-widest bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full ml-1">{nearbyPharmacies.length} found</span>
+                </div>
+
+                {/* Quick comparison table */}
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm mb-5 overflow-hidden">
+                  <div className="grid grid-cols-[1fr_60px_55px_60px] text-[9px] font-black uppercase tracking-widest text-slate-400 px-4 py-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
+                    <span>Pharmacy</span><span className="text-center">Dist</span><span className="text-center">Rating</span><span className="text-center">Open</span>
+                  </div>
+                  {visiblePharmacies.map((p, i) => (
+                    <div key={p.id} className={`grid grid-cols-[1fr_60px_55px_60px] items-center px-4 py-2.5 ${i < visiblePharmacies.length - 1 ? 'border-b border-slate-50 dark:border-slate-700/50' : ''} ${i === 0 ? 'bg-emerald-50/50 dark:bg-emerald-900/20' : ''}`}>
+                      <div>
+                        <p className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate pr-2">{p.name}</p>
+                        <p className="text-[9px] text-slate-400">{p.state}</p>
+                      </div>
+                      <p className="text-xs font-black text-center text-slate-700 dark:text-slate-300">{p.distance.toFixed(0)}km</p>
+                      <p className="text-xs font-bold text-center text-amber-500">⭐{p.rating}</p>
+                      <div className="flex justify-center">
+                        {p.open24x7
+                          ? <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[8px] font-black px-1.5 py-0.5 rounded-full">24×7</span>
+                          : <span className="bg-slate-100 dark:bg-slate-700 text-slate-400 text-[8px] font-black px-1.5 py-0.5 rounded-full">⏰</span>
+                        }
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Detailed cards */}
+                <div className="space-y-4">
+                  {visiblePharmacies.map((p, index) => (
+                    <div key={p.id} className={`bg-white dark:bg-slate-800 p-4 rounded-2xl border shadow-md relative overflow-hidden transition-colors ${
+                      routeInfo?.name === p.name
+                        ? 'border-emerald-400 dark:border-emerald-500 ring-2 ring-emerald-100 dark:ring-emerald-900/50'
+                        : 'border-slate-200 dark:border-slate-700'
+                    }`}>
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1 min-w-0">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider mb-1.5 ${
+                            index === 0 ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                          }`}>
+                            {index === 0 ? '⭐ Closest Pharmacy' : index === 1 ? '💊 Great Option' : '📍 Nearby'}
+                          </span>
+                          <h4 className="font-black text-slate-900 dark:text-slate-100 text-base leading-tight pr-2">{p.name}</h4>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold mt-0.5">Pharmacy</p>
+                        </div>
+                        <span className={`shrink-0 text-[9px] font-black px-2 py-0.5 rounded-full border ${
+                          p.open24x7
+                            ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600'
+                        }`}>
+                          {p.open24x7 ? '🟢 24×7 Open' : '⏰ Check Hours'}
+                        </span>
+                      </div>
+
+                      <StarRating rating={p.rating || 4.0} />
+
+                      <div className="grid grid-cols-2 gap-2 mt-3">
+                        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-2.5 border border-slate-100 dark:border-slate-600">
+                          <p className="text-[8px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">Distance</p>
+                          <p className="font-black text-slate-800 dark:text-slate-100 text-base">{p.distance.toFixed(1)} <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">km</span></p>
+                        </div>
+                        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-2.5 border border-slate-100 dark:border-slate-600">
+                          <p className="text-[8px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">Status</p>
+                          <p className={`font-black text-base ${p.open24x7 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                            {p.open24x7 ? 'Open' : 'Verify'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handlePharmacyNavigate(p)}
+                            className={`flex-1 py-2 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 ${
+                              routeInfo?.name === p.name
+                                ? 'bg-green-600 text-white'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.97]'
+                            }`}
+                          >
+                            {routeInfo?.name === p.name ? '✓ Routed' : '🧭 Navigate'}
+                          </button>
+                          {p.phone && (
+                            <a href={`tel:${p.phone.replace(/ /g,'')}`}
+                              className="flex-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2 rounded-xl font-bold text-sm shadow-sm flex items-center justify-center gap-1.5 active:scale-[0.97] transition-transform">
+                              📞 Call
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Show All / Show Less toggle */}
+                {nearbyPharmacies.length > 5 && (
+                  <button
+                    onClick={() => setShowAllPharmacies(v => !v)}
+                    className="w-full mt-4 py-3 rounded-2xl border-2 border-dashed border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400 text-sm font-bold hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    {showAllPharmacies
+                      ? `↑ Show Less`
+                      : `↓ Show All ${nearbyPharmacies.length} Pharmacies`
+                    }
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
