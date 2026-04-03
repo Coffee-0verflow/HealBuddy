@@ -1,314 +1,296 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import OfflineBanner from './components/OfflineBanner';
-import HomeScreen from './components/HomeScreen';
 import SymptomFlow from './components/SymptomFlow';
-import NearbyOptions from './components/NearbyOptions';
-import FirstAid from './components/FirstAid';
-import PhraseCards from './components/PhraseCards';
-import DemoMode from './components/DemoMode';
-import EvalMode from './components/EvalMode';
-import { cities } from './data/emergencyPhrases';
-import { runTriage } from './logic/triageEngine';
+import Guidance from './components/Guidance';
+import MapScreen from './components/MapScreen';
 
-const NAV = [
-  { id: 'home',     icon: '🏠', label: 'Home' },
-  { id: 'nearby',   icon: '📍', label: 'Nearby Care' },
-  { id: 'firstaid', icon: '🩹', label: 'First Aid' },
-  { id: 'phrases',  icon: '🗣️', label: 'Phrases' },
-  { id: 'demo',     icon: '🎬', label: 'Demo' },
-  { id: 'eval',     icon: '📋', label: 'About' },
-];
+const SYMPTOM_ICONS = {
+  "Fever": "🌡️",
+  "Stomach Issue": "🤢",
+  "Injury / Wound": "🩹",
+  "Breathing Problem": "😮‍💨",
+  "Chest Pain": "❤️‍🔥",
+  "Dehydration": "💧",
+};
 
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 1024);
-  useEffect(() => {
-    const handler = () => setIsDesktop(window.innerWidth >= 1024);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-  return isDesktop;
-}
-
-export default function App() {
-  const isDesktop = useIsDesktop();
-  const [screen, setScreen]               = useState('home');
-  const [activeSymptom, setActiveSymptom] = useState(null);
-  const [triageResult, setTriageResult]   = useState(null);
-  const [selectedCity, setSelectedCity]   = useState('');
-  const [calmMode, setCalmMode]           = useState(false);
-
-  const [darkMode, setDarkMode] = useState(() => {
-    const stored = localStorage.getItem('hb-dark');
-    if (stored !== null) return stored === 'true';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('hb-dark', String(darkMode));
-  }, [darkMode]);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('calm', calmMode);
-  }, [calmMode]);
-
-  const isHomeGroup = ['home', 'triage', 'triage_result'].includes(screen);
-
-  function navigate(id) { setScreen(id); }
-
-  function handleSelectSymptom(id) {
-    setActiveSymptom(id);
-    setTriageResult(null);
-    setScreen('triage');
-  }
-
-  function handleRunScenario(scenario) {
-    const cityObj = cities.find(c => c.label.toLowerCase() === scenario.city.toLowerCase());
-    if (cityObj) setSelectedCity(cityObj.id);
-    setActiveSymptom(scenario.symptomId);
-    const result = runTriage(scenario.symptomId, scenario.answers);
-    setTriageResult(result);
-    setScreen('triage_result');
-  }
-
-  const sharedProps = {
-    screen, activeSymptom, triageResult, selectedCity,
-    onSelectSymptom: handleSelectSymptom,
-    onSelectCity: setSelectedCity,
-    onTriageResult: setTriageResult,
-    onRunScenario: handleRunScenario,
-    onNavigate: navigate,
-    onBack: () => navigate('home'),
-  };
-
-  if (isDesktop) {
-    return (
-      <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--bg-base)' }}>
-        {/* Sidebar */}
-        <aside style={{
-          width: 260, flexShrink: 0, display: 'flex', flexDirection: 'column',
-          background: 'var(--bg-surface)', borderRight: '1px solid var(--border)',
-          height: '100vh', overflow: 'hidden',
-        }}>
-          {/* Logo */}
-          <div style={{ padding: '20px', borderBottom: '1px solid var(--border)' }}>
-            <button onClick={() => navigate('home')} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', cursor: 'pointer', width: '100%' }}>
-              <span style={{ fontSize: 28 }}>🩺</span>
-              <div style={{ textAlign: 'left' }}>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: 'var(--text-primary)' }}>HealBuddy</p>
-                <p style={{ margin: 0, fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Health Emergency Assistant</p>
-              </div>
-            </button>
-          </div>
-
-          {/* Nav */}
-          <nav style={{ flex: 1, padding: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {NAV.map(item => {
-              const active = screen === item.id || (item.id === 'home' && isHomeGroup);
-              return (
-                <button key={item.id} onClick={() => navigate(item.id)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    width: '100%', padding: '10px 16px', borderRadius: 12,
-                    border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500,
-                    background: active ? '#2563eb' : 'transparent',
-                    color: active ? '#fff' : 'var(--text-secondary)',
-                    transition: 'background 0.15s',
-                  }}
-                  onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--bg-elevated)'; }}
-                  onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
-                >
-                  <span style={{ fontSize: 18 }}>{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Bottom controls */}
-          <div style={{ padding: '12px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <button onClick={() => setDarkMode(!darkMode)}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '10px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500, background: 'transparent', color: 'var(--text-secondary)' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >
-              <span style={{ fontSize: 18 }}>{darkMode ? '☀️' : '🌙'}</span>
-              <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-            </button>
-            <button onClick={() => setCalmMode(!calmMode)}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '10px 16px', borderRadius: 12, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500, background: calmMode ? '#f0fdf4' : 'transparent', color: calmMode ? '#15803d' : 'var(--text-secondary)' }}
-            >
-              <span style={{ fontSize: 18 }}>🌿</span>
-              <span>{calmMode ? 'Calm Mode On' : 'Calm Mode'}</span>
-            </button>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, paddingTop: 4 }}>
-              <a href="tel:112" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 12, background: '#dc2626', color: '#fff', fontWeight: 700, fontSize: 12, textDecoration: 'none' }}>📞 112</a>
-              <a href="tel:108" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 12, background: '#f97316', color: '#fff', fontWeight: 700, fontSize: 12, textDecoration: 'none' }}>🚑 108</a>
-            </div>
-          </div>
-        </aside>
-
-        {/* Main */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-          {/* Topbar */}
-          <div style={{ flexShrink: 0, background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>
-              {NAV.find(n => n.id === screen || (n.id === 'home' && isHomeGroup))?.label || 'HealBuddy'}
-            </span>
-            <OfflineBanner inline />
-          </div>
-          {/* Content */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '32px 40px' }}>
-            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-              <PageContent {...sharedProps} />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Mobile layout
+function Dashboard({ onNavigate, onQuickSymptom }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-base)' }}>
-      {/* Mobile header */}
-      <div style={{ flexShrink: 0, background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px' }}>
-          <button onClick={() => navigate('home')} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}>
-            <span style={{ fontSize: 20 }}>🩺</span>
-            <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-primary)' }}>HealBuddy</span>
+    <div className="min-h-full">
+      {/* Hero */}
+      <section className="text-center pt-12 pb-10 px-4">
+        <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-700 text-xs font-bold px-4 py-1.5 rounded-full border border-teal-200 mb-6">
+          <span>📡</span> Works 100% Offline
+        </div>
+        <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+          Your <span className="text-teal-600 italic">Offline</span> Emergency<br/>Health Buddy
+        </h1>
+        <p className="text-slate-500 max-w-lg mx-auto text-sm leading-relaxed mb-8">
+          Know what to do, where to go, and who to trust—even without internet. Medical confidence for every traveler, anywhere.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <button 
+            onClick={() => onNavigate('input')}
+            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.97]"
+          >
+            Start Now
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button onClick={() => setCalmMode(!calmMode)}
-              style={{ padding: '6px 10px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 500, background: calmMode ? '#ccfbf1' : 'var(--bg-elevated)', color: calmMode ? '#0f766e' : 'var(--text-secondary)' }}>
-              🌿
-            </button>
-            <button onClick={() => setDarkMode(!darkMode)}
-              style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-              {darkMode ? '☀️' : '🌙'}
+          <button 
+            onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-slate-50 transition-all active:scale-[0.97]"
+          >
+            How it works
+          </button>
+        </div>
+      </section>
+
+      {/* Search Bar */}
+      <section className="max-w-2xl mx-auto px-4 mb-10">
+        <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center mb-5">
+          How are you <em className="text-teal-600 not-italic font-black italic">feeling</em> today?
+        </h2>
+        <div className="relative">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🔍</span>
+          <input 
+            type="text" 
+            placeholder="Enter your symptom (fever, chest pain, injury...)"
+            className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent shadow-sm"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.target.value.trim()) {
+                onQuickSymptom(e.target.value.trim());
+              }
+            }}
+          />
+        </div>
+      </section>
+
+      {/* Feature Cards Grid */}
+      <section id="features" className="max-w-4xl mx-auto px-4 pb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          {/* Emergency Card */}
+          <div className="md:col-span-2 bg-gradient-to-br from-red-50 to-rose-50 border border-red-100 rounded-2xl p-6 relative overflow-hidden">
+            <div className="absolute top-4 right-4 text-red-200 text-5xl opacity-30 pointer-events-none">✱</div>
+            <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white text-lg mb-4 shadow-md">🚨</div>
+            <h3 className="text-xl font-black text-slate-900 mb-2">Immediate Danger?</h3>
+            <p className="text-sm text-slate-600 mb-5 max-w-sm">One tap to call 112 or 108. Share your GPS location with emergency services instantly.</p>
+            <div className="flex gap-3">
+              <a href="tel:112" className="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-colors active:scale-[0.97]">
+                📞 Call 112
+              </a>
+              <a href="tel:108" className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-colors active:scale-[0.97]">
+                🚑 Call 108
+              </a>
+            </div>
+          </div>
+
+          {/* First Aid Guide */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white text-lg mb-4 shadow-md">🩹</div>
+            <h3 className="text-lg font-black text-slate-900 mb-2">First Aid Guide</h3>
+            <p className="text-sm text-slate-500 mb-4">Step-by-step instructions for <strong>10 scenarios</strong>. Works offline.</p>
+            <button onClick={() => onNavigate('input')} className="text-teal-600 font-bold text-sm hover:text-teal-700 transition-colors flex items-center gap-1">
+              View Guides →
             </button>
           </div>
         </div>
-        <OfflineBanner />
-      </div>
 
-      {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-        <PageContent {...sharedProps} />
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Find Nearby Help */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <div className="w-10 h-10 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center text-lg mb-4">🏥</div>
+            <h3 className="text-lg font-black text-slate-900 mb-2">Find Nearby Help</h3>
+            <p className="text-sm text-slate-500 mb-4">Hospitals, clinics and pharmacies across <strong>20+ Indian cities</strong>.</p>
+            <button onClick={() => onNavigate('map')} className="text-teal-600 font-bold text-sm hover:text-teal-700 transition-colors flex items-center gap-1">
+              Open Map 🗺️
+            </button>
+          </div>
 
-      {/* Bottom nav */}
-      <div style={{ flexShrink: 0, background: 'var(--bg-surface)', borderTop: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex' }}>
-          {NAV.map(item => {
-            const active = screen === item.id || (item.id === 'home' && isHomeGroup);
-            return (
-              <button key={item.id} onClick={() => navigate(item.id)}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer', background: 'transparent', color: active ? '#2563eb' : 'var(--text-muted)', fontSize: 11, fontWeight: 500 }}
-                aria-label={item.label}
-              >
-                <span style={{ fontSize: 20, lineHeight: 1 }}>{item.icon}</span>
-                <span>{item.label}</span>
-                {active && <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#2563eb' }} />}
-              </button>
-            );
-          })}
+          {/* Smart Symptom Analysis */}
+          <div className="bg-teal-600 rounded-2xl p-6 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500 rounded-bl-full opacity-30 pointer-events-none"></div>
+            <span className="text-[10px] font-black uppercase tracking-widest bg-teal-500/50 px-2.5 py-1 rounded-full mb-3 inline-block">HealBuddy AI</span>
+            <h3 className="text-xl font-black mb-2">Smart Symptom Analysis</h3>
+            <p className="text-teal-100 text-sm mb-5">Answer a few questions to get instant triage guidance across <strong className="text-white">10 symptom categories</strong>.</p>
+            
+            <div className="grid grid-cols-3 gap-2 mb-5">
+              {Object.entries(SYMPTOM_ICONS).map(([label, icon]) => (
+                <button 
+                  key={label}
+                  onClick={() => onQuickSymptom(label)}
+                  className="bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-xl p-2.5 text-center transition-colors active:scale-[0.95]"
+                >
+                  <span className="text-xl block mb-0.5">{icon}</span>
+                  <span className="text-[9px] font-bold leading-tight block">{label}</span>
+                </button>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => onNavigate('input')}
+              className="bg-white text-teal-700 px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-teal-50 transition-colors active:scale-[0.97]"
+            >
+              Start Assessment
+            </button>
+          </div>
         </div>
-      </div>
+
+        {/* Quick Symptom Access */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h3 className="text-lg font-black text-slate-900 mb-4">Quick Symptom Access</h3>
+          <div className="flex flex-wrap gap-2">
+            {["High Fever","Bleeding","Body Pain","Dizziness","Vomiting","Chest Pain","Breathing Issue","Burns","Fracture","Animal Bite","Food Poisoning","Allergic Reaction"].map(s => (
+              <button 
+                key={s}
+                onClick={() => onQuickSymptom(s)}
+                className="px-4 py-2 bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-teal-700 text-xs font-bold rounded-full border border-slate-200 hover:border-teal-200 transition-all active:scale-[0.95]"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom Features Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+            <div className="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center text-lg mb-3">🗣️</div>
+            <h3 className="text-lg font-black text-slate-900 mb-1">Offline Translation</h3>
+            <p className="text-sm text-slate-500">20+ medical phrases translated to 8 Indian languages instantly.</p>
+          </div>
+          <div className="bg-teal-50 border border-teal-100 rounded-2xl p-6">
+            <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center text-lg mb-3">📋</div>
+            <h3 className="text-lg font-black text-slate-900 mb-1">Vitals Sync</h3>
+            <p className="text-sm text-slate-500">Store medical history and allergies locally for first responders to access instantly.</p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
 
-/* ── Page content router ── */
-function PageContent({
-  screen, activeSymptom, triageResult, selectedCity,
-  onSelectSymptom, onSelectCity, onTriageResult, onRunScenario, onNavigate, onBack
-}) {
-  if (screen === 'home') return (
-    <HomeScreen
-      onSelectSymptom={onSelectSymptom}
-      onSelectCity={onSelectCity}
-      selectedCity={selectedCity}
-      onNavigate={onNavigate}
-    />
-  );
+export default function App() {
+  const [screen, setScreen] = useState('dashboard');
+  const [analysis, setAnalysis] = useState(null);
 
-  if (screen === 'triage' && activeSymptom) return (
-    <SymptomFlow symptomId={activeSymptom} onResult={onTriageResult} onBack={onBack} />
-  );
+  const handleAnalysisComplete = (result) => {
+    setAnalysis(result);
+    setScreen('guidance');
+  };
 
-  if (screen === 'triage_result' && triageResult) return (
-    <TriageResultPage triageResult={triageResult} selectedCity={selectedCity} onBack={onBack} onSelectCity={onSelectCity} />
-  );
+  const handleQuickSymptom = async (symptom) => {
+    const { analyzeSymptomsOffline } = await import('./logic/ai');
+    try {
+      const result = await analyzeSymptomsOffline(symptom);
+      setAnalysis(result);
+      setScreen('guidance');
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  if (screen === 'nearby') return (
-    <NearbyOptions
-      city={selectedCity}
-      urgency={triageResult?.urgency || 'clinic'}
-      specialties={triageResult?.specialties || []}
-      onSelectCity={onSelectCity}
-    />
-  );
+  const activeTab = screen === 'dashboard' ? 'dashboard' : screen === 'map' ? 'hospitals' : 'guidance';
 
-  if (screen === 'firstaid') return <FirstAid />;
-  if (screen === 'phrases')  return <PhraseCards />;
-  if (screen === 'demo')     return <DemoMode onRunScenario={onRunScenario} />;
-  if (screen === 'eval')     return <EvalMode />;
-  return null;
-}
-
-/* ── Triage result page ── */
-function TriageResultPage({ triageResult, selectedCity, onBack, onSelectCity }) {
   return (
-    <div className="space-y-5 pb-10">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-sm transition-colors"
-        style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
-        onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
-        onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-      >
-        ← Back to Home
-      </button>
+    <div className="h-[100dvh] bg-white flex flex-col font-sans overflow-hidden">
+      <OfflineBanner />
+      
+      {/* Teal Navbar */}
+      <header className="bg-slate-800 text-white flex items-center gap-1 shrink-0 px-4 md:px-8 py-0 z-50 sticky top-0">
+        <button 
+          onClick={() => { setScreen('dashboard'); setAnalysis(null); }}
+          className="text-teal-400 font-black text-lg tracking-tight mr-4 py-3 hover:text-teal-300 transition-colors"
+        >
+          HealBuddy
+        </button>
+        
+        <nav className="hidden sm:flex items-center gap-1 flex-1">
+          <button 
+            onClick={() => { setScreen('dashboard'); setAnalysis(null); }}
+            className={`px-3 py-3 text-xs font-bold transition-colors ${activeTab === 'dashboard' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-400 hover:text-white'}`}
+          >
+            Dashboard
+          </button>
+          <button 
+            onClick={() => setScreen('input')}
+            className={`px-3 py-3 text-xs font-bold transition-colors ${activeTab === 'guidance' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-400 hover:text-white'}`}
+          >
+            Guidance
+          </button>
+          <button 
+            onClick={() => setScreen('map')}
+            className={`px-3 py-3 text-xs font-bold transition-colors ${activeTab === 'hospitals' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-400 hover:text-white'}`}
+          >
+            Hospitals
+          </button>
+        </nav>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div className={`rounded-2xl p-5 border shadow-sm ${triageResult.isEmergency ? 'bg-red-50 border-red-200' : ''}`}
-            style={!triageResult.isEmergency ? { background: 'var(--bg-surface)', borderColor: 'var(--border)' } : {}}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-2xl">{triageResult.symptom.icon}</span>
-              <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{triageResult.symptom.label}</span>
-            </div>
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold ${triageResult.config.bg} ${triageResult.config.text} mb-3`}>
-              {triageResult.config.icon} {triageResult.config.label}
-            </span>
-            <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>{triageResult.rationale}</p>
-            <div className="flex items-start gap-2 p-3 rounded-xl" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
-              <span className="text-base mt-0.5">ℹ️</span>
-              <p className="text-xs text-amber-800">This is not a medical diagnosis. It is a guidance tool. Always consult a qualified doctor.</p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl p-4" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-            <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-1">Recommended Action</p>
-            <p className="text-base font-bold text-blue-800">{triageResult.config.action}</p>
-          </div>
-
-          {triageResult.isEmergency && (
-            <div className="grid grid-cols-2 gap-2">
-              <a href="tel:112" className="flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm text-white" style={{ background: '#dc2626' }}>📞 Call 112</a>
-              <a href="tel:108" className="flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm text-white" style={{ background: '#f97316' }}>🚑 Call 108</a>
-            </div>
-          )}
+        <div className="ml-auto flex items-center gap-2">
+          <button className="text-slate-400 hover:text-white p-2 transition-colors text-sm">⚙️</button>
+          <a href="tel:112" className="bg-teal-600 hover:bg-teal-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-colors active:scale-[0.95]">Emergency</a>
         </div>
+      </header>
 
-        <NearbyOptions
-          city={selectedCity}
-          urgency={triageResult.urgency}
-          specialties={triageResult.specialties}
-          onSelectCity={onSelectCity}
-        />
+      {/* Mobile Bottom Nav */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex z-50 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
+        <button 
+          onClick={() => { setScreen('dashboard'); setAnalysis(null); }}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'dashboard' ? 'text-teal-600' : 'text-slate-400'}`}
+        >
+          <span className="text-base">🏠</span>Home
+        </button>
+        <button
+          onClick={() => setScreen('input')}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'guidance' ? 'text-teal-600' : 'text-slate-400'}`}
+        >
+          <span className="text-base">🩺</span>Guidance
+        </button>
+        <button
+          onClick={() => setScreen('map')}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'hospitals' ? 'text-teal-600' : 'text-slate-400'}`}
+        >
+          <span className="text-base">🏥</span>Hospitals
+        </button>
+        <a
+          href="tel:112"
+          className="flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold text-red-500"
+        >
+          <span className="text-base">🚨</span>SOS
+        </a>
       </div>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto relative scroll-smooth pb-14 sm:pb-0">
+        {screen === 'dashboard' && (
+          <Dashboard onNavigate={setScreen} onQuickSymptom={handleQuickSymptom} />
+        )}
+
+        {screen === 'input' && (
+          <div className="max-w-3xl mx-auto px-2 py-4">
+            <SymptomFlow onAnalysisComplete={handleAnalysisComplete} />
+          </div>
+        )}
+        
+        {screen === 'guidance' && analysis && (
+          <div className="max-w-3xl mx-auto px-2 py-4">
+            <Guidance 
+              analysis={analysis} 
+              onFindDoctors={() => setScreen('map')} 
+              onReset={() => {
+                setAnalysis(null);
+                setScreen('dashboard');
+              }}
+            />
+          </div>
+        )}
+        
+        {screen === 'map' && (
+          <div className="absolute inset-0 z-40 bg-white">
+            <MapScreen 
+              onBack={() => setScreen(analysis ? 'guidance' : 'dashboard')} 
+              requiredDoctorType={analysis?.doctor_type || analysis?.doctorType}
+            />
+          </div>
+        )}
+      </main>
     </div>
   );
 }
