@@ -120,7 +120,7 @@ function StarRating({ rating }) {
   );
 }
 
-export default function MapScreen({ onBack, requiredDoctorType, showPharmacies = false }) {
+export default function MapScreen({ onBack, requiredDoctorType, showPharmacies = false, showHospitals = true }) {
   const [userLocation, setUserLocation] = useState(null);
   const [nearbyDocs, setNearbyDocs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -266,7 +266,7 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </div>
               <div className="min-w-0">
-                <p className="font-bold text-sm text-slate-800 dark:text-slate-100 leading-none">Nearby Hospitals</p>
+                <p className="font-bold text-sm text-slate-800 dark:text-slate-100 leading-none">{showHospitals ? 'Nearby Hospitals' : 'Nearby Pharmacies'}</p>
                 {requiredDoctorType && (
                   <p className="text-[10px] text-indigo-500 dark:text-indigo-400 font-semibold mt-0.5 truncate">{requiredDoctorType}</p>
                 )}
@@ -326,7 +326,7 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
                 <Popup><span className="font-bold" style={{color:'#dc2626'}}>📍 You are here</span><br/><span className="text-xs">Tap anywhere to relocate</span></Popup>
               </Marker>
 
-              {filteredDoctors.map(doc => (
+              {showHospitals && filteredDoctors.map(doc => (
                 <Marker key={doc.id} position={[doc.lat, doc.lng]}>
                   <Popup>
                     <div style={{ minWidth: '140px' }}>
@@ -338,7 +338,6 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
                   </Popup>
                 </Marker>
               ))}
-
               {/* Pharmacy markers — sorted nearest first */}
               {showPharmacies && nearbyPharmacies.map((p, i) => (
                 <Marker key={p.id} position={[p.lat, p.lng]} icon={L.divIcon({
@@ -393,37 +392,38 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
             </div>
           </div>
 
-          {/* Hospital Cards */}
+          {/* Cards Panel */}
           <div className="flex-1 bg-slate-50 dark:bg-slate-950 overflow-y-auto px-3 sm:px-5 pt-5 pb-6 -mt-3 relative z-10 rounded-t-3xl border-t border-slate-200/50 dark:border-slate-700/50 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
             <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-4"></div>
-            <h3 className="font-black text-lg text-slate-800 dark:text-slate-100 mb-4 ml-1">Top 5 Hospitals for You</h3>
-            
-            {/* Quick Comparison Table */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm mb-5 overflow-hidden">
-              <div className="grid grid-cols-[1fr_60px_55px_60px] text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-4 py-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
-                <span>Hospital</span><span className="text-center">Dist</span><span className="text-center">Rating</span><span className="text-center">Match</span>
-              </div>
-              {nearbyDocs.map((doc, i) => (
-                <div key={doc.id} className={`grid grid-cols-[1fr_60px_55px_60px] items-center px-4 py-2.5 ${i < nearbyDocs.length - 1 ? 'border-b border-slate-50 dark:border-slate-700/50' : ''} ${i === 0 ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''}`}>
-                  <div>
-                    <p className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate pr-2">{doc.name}</p>
-                    <p className="text-[9px] text-slate-400 dark:text-slate-500">{doc.cost}</p>
-                  </div>
-                  <p className="text-xs font-black text-center text-slate-700 dark:text-slate-300">{doc.distance.toFixed(0)}km</p>
-                  <p className="text-xs font-bold text-center text-amber-500">⭐{doc.rating}</p>
-                  <div className="flex justify-center">
-                    {doc.condMatch?.matched 
-                      ? <span className="bg-green-100 text-green-700 text-[8px] font-black px-1.5 py-0.5 rounded-full">YES</span>
-                      : <span className="bg-slate-100 text-slate-400 text-[8px] font-black px-1.5 py-0.5 rounded-full">—</span>
-                    }
-                  </div>
-                </div>
-              ))}
-            </div>
 
-            {/* Detailed Cards */}
-            <div className="space-y-4">
-              {nearbyDocs.map((doc, index) => (
+            {showHospitals && (
+              <>
+                <h3 className="font-black text-lg text-slate-800 dark:text-slate-100 mb-4 ml-1">Top 5 Hospitals for You</h3>
+                {/* Quick Comparison Table */}
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm mb-5 overflow-hidden">
+                  <div className="grid grid-cols-[1fr_60px_55px_60px] text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-4 py-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
+                    <span>Hospital</span><span className="text-center">Dist</span><span className="text-center">Rating</span><span className="text-center">Match</span>
+                  </div>
+                  {nearbyDocs.map((doc, i) => (
+                    <div key={doc.id} className={`grid grid-cols-[1fr_60px_55px_60px] items-center px-4 py-2.5 ${i < nearbyDocs.length - 1 ? 'border-b border-slate-50 dark:border-slate-700/50' : ''} ${i === 0 ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''}`}>
+                      <div>
+                        <p className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate pr-2">{doc.name}</p>
+                        <p className="text-[9px] text-slate-400 dark:text-slate-500">{doc.cost}</p>
+                      </div>
+                      <p className="text-xs font-black text-center text-slate-700 dark:text-slate-300">{doc.distance.toFixed(0)}km</p>
+                      <p className="text-xs font-bold text-center text-amber-500">⭐{doc.rating}</p>
+                      <div className="flex justify-center">
+                        {doc.condMatch?.matched
+                          ? <span className="bg-green-100 text-green-700 text-[8px] font-black px-1.5 py-0.5 rounded-full">YES</span>
+                          : <span className="bg-slate-100 text-slate-400 text-[8px] font-black px-1.5 py-0.5 rounded-full">—</span>
+                        }
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Detailed Cards */}
+                <div className="space-y-4">
+                  {nearbyDocs.map((doc, index) => (
                 <div key={doc.id} className={`bg-white dark:bg-slate-800 p-4 rounded-2xl border shadow-md relative overflow-hidden transition-colors ${routeInfo?.name === doc.name ? 'border-indigo-400 dark:border-indigo-500 ring-2 ring-indigo-100 dark:ring-indigo-900/50' : 'border-slate-200 dark:border-slate-700'}`}>
                   
                   <div className="flex items-start justify-between mb-2">
@@ -502,10 +502,12 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+                  ))}
+                </div>
+              </>
+            )}
 
-            {/* Pharmacy Cards — identical layout to hospital cards */}
+            {/* Pharmacy Cards */}
             {showPharmacies && nearbyPharmacies.length > 0 && (
               <div className="mt-6">
                 <div className="flex items-center gap-2 mb-3">

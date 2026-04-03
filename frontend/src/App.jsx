@@ -279,7 +279,7 @@ export default function App() {
     setScreen('input');
   };
 
-  const activeTab = screen === 'dashboard' ? 'dashboard' : screen === 'map' ? 'hospitals' : screen === 'firstaid' ? 'firstaid' : screen === 'language' ? 'language' : 'guidance';
+  const activeTab = screen === 'dashboard' ? 'dashboard' : screen === 'map' ? 'hospitals' : screen === 'pharmacy' ? 'pharmacy' : screen === 'firstaid' ? 'firstaid' : screen === 'language' ? 'language' : 'guidance';
 
   return (
     <div className="h-[100dvh] bg-white dark:bg-black flex flex-col font-sans overflow-hidden">
@@ -296,11 +296,12 @@ export default function App() {
         
         <nav className="hidden sm:flex items-center gap-0 flex-1 h-full">
           {[
-            { id: 'dashboard', label: 'Home',      action: () => { setScreen('dashboard'); setAnalysis(null); } },
-            { id: 'guidance',  label: 'Guidance',   action: () => setScreen('pick') },
-            { id: 'firstaid',  label: 'First Aid',  action: () => setScreen('firstaid') },
-            { id: 'language',  label: '🗣️ Phrases',  action: () => setScreen('language') },
-            { id: 'hospitals', label: 'Hospitals',  action: () => setScreen('map') },
+            { id: 'dashboard', label: 'Home',       action: () => { setScreen('dashboard'); setAnalysis(null); } },
+            { id: 'guidance',  label: 'Guidance',    action: () => setScreen('pick') },
+            { id: 'firstaid',  label: 'First Aid',   action: () => setScreen('firstaid') },
+            { id: 'language',  label: '🗣️ Phrases',   action: () => setScreen('language') },
+            { id: 'hospitals', label: 'Hospitals',   action: () => setScreen('map') },
+            { id: 'pharmacy',  label: '💊 Pharmacy',   action: () => setScreen('pharmacy') },
           ].map(item => (
             <button
               key={item.id}
@@ -365,18 +366,18 @@ export default function App() {
           {activeTab === 'firstaid' && <span className="w-1 h-1 rounded-full bg-teal-500 mt-0.5" />}
         </button>
         <button
-          onClick={() => setScreen('language')}
-          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'language' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
-        >
-          <span className="text-lg">🗣️</span>Phrases
-          {activeTab === 'language' && <span className="w-1 h-1 rounded-full bg-teal-500 mt-0.5" />}
-        </button>
-        <button
           onClick={() => setScreen('map')}
           className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'hospitals' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
         >
           <span className="text-lg">🏥</span>Hospitals
           {activeTab === 'hospitals' && <span className="w-1 h-1 rounded-full bg-teal-500 mt-0.5" />}
+        </button>
+        <button
+          onClick={() => setScreen('pharmacy')}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'pharmacy' ? 'text-emerald-500' : 'text-slate-400 dark:text-slate-500'}`}
+        >
+          <span className="text-lg">💊</span>Pharmacy
+          {activeTab === 'pharmacy' && <span className="w-1 h-1 rounded-full bg-emerald-500 mt-0.5" />}
         </button>
         <a
           href="tel:112"
@@ -444,6 +445,18 @@ export default function App() {
               onBack={() => setScreen(analysis ? 'guidance' : 'dashboard')} 
               requiredDoctorType={analysis?.doctor_type || analysis?.doctorType}
               showPharmacies={analysis?.showPharmacyMode === true}
+              showHospitals={true}
+            />
+          </div>
+        )}
+
+        {screen === 'pharmacy' && (
+          <div className="absolute inset-0 z-40 bg-white dark:bg-black">
+            <MapScreen 
+              onBack={() => setScreen('dashboard')}
+              requiredDoctorType={null}
+              showPharmacies={true}
+              showHospitals={false}
             />
           </div>
         )}
