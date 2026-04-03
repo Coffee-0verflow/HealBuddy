@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import OfflineBanner from './components/OfflineBanner';
 import SymptomFlow from './components/SymptomFlow';
 import Guidance from './components/Guidance';
@@ -18,13 +18,13 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
     <div className="min-h-full">
       {/* Hero */}
       <section className="text-center pt-12 pb-10 px-4">
-        <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-700 text-xs font-bold px-4 py-1.5 rounded-full border border-teal-200 mb-6">
+        <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 text-xs font-bold px-4 py-1.5 rounded-full border border-teal-200 dark:border-teal-800 mb-6">
           <span>📡</span> Works 100% Offline
         </div>
-        <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+        <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-tight mb-4">
           Your <span className="text-teal-600 italic">Offline</span> Emergency<br/>Health Buddy
         </h1>
-        <p className="text-slate-500 max-w-lg mx-auto text-sm leading-relaxed mb-8">
+        <p className="text-slate-500 dark:text-slate-400 max-w-lg mx-auto text-sm leading-relaxed mb-8">
           Know what to do, where to go, and who to trust—even without internet. Medical confidence for every traveler, anywhere.
         </p>
         <div className="flex gap-3 justify-center">
@@ -36,7 +36,7 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
           </button>
           <button 
             onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-white border border-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-slate-50 transition-all active:scale-[0.97]"
+            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-[0.97]"
           >
             How it works
           </button>
@@ -45,7 +45,7 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
 
       {/* Search Bar */}
       <section className="max-w-2xl mx-auto px-4 mb-10">
-        <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center mb-5">
+        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100 text-center mb-5">
           How are you <em className="text-teal-600 not-italic font-black italic">feeling</em> today?
         </h2>
         <div className="relative">
@@ -53,7 +53,7 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
           <input 
             type="text" 
             placeholder="Enter your symptom (fever, chest pain, injury...)"
-            className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent shadow-sm"
+            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent shadow-sm"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && e.target.value.trim()) {
                 onQuickSymptom(e.target.value.trim());
@@ -67,11 +67,11 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
       <section id="features" className="max-w-4xl mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {/* Emergency Card */}
-          <div className="md:col-span-2 bg-gradient-to-br from-red-50 to-rose-50 border border-red-100 rounded-2xl p-6 relative overflow-hidden">
+          <div className="md:col-span-2 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/40 border border-red-100 dark:border-red-900/50 rounded-2xl p-6 relative overflow-hidden">
             <div className="absolute top-4 right-4 text-red-200 text-5xl opacity-30 pointer-events-none">✱</div>
             <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white text-lg mb-4 shadow-md">🚨</div>
-            <h3 className="text-xl font-black text-slate-900 mb-2">Immediate Danger?</h3>
-            <p className="text-sm text-slate-600 mb-5 max-w-sm">One tap to call 112 or 108. Share your GPS location with emergency services instantly.</p>
+            <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 mb-2">Immediate Danger?</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-5 max-w-sm">One tap to call 112 or 108. Share your GPS location with emergency services instantly.</p>
             <div className="flex gap-3">
               <a href="tel:112" className="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-colors active:scale-[0.97]">
                 📞 Call 112
@@ -83,10 +83,10 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
           </div>
 
           {/* First Aid Guide */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
             <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white text-lg mb-4 shadow-md">🩹</div>
-            <h3 className="text-lg font-black text-slate-900 mb-2">First Aid Guide</h3>
-            <p className="text-sm text-slate-500 mb-4">Step-by-step instructions for <strong>10 scenarios</strong>. Works offline.</p>
+            <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 mb-2">First Aid Guide</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Step-by-step instructions for <strong>10 scenarios</strong>. Works offline.</p>
             <button onClick={() => onNavigate('input')} className="text-teal-600 font-bold text-sm hover:text-teal-700 transition-colors flex items-center gap-1">
               View Guides →
             </button>
@@ -95,10 +95,10 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           {/* Find Nearby Help */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <div className="w-10 h-10 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center text-lg mb-4">🏥</div>
-            <h3 className="text-lg font-black text-slate-900 mb-2">Find Nearby Help</h3>
-            <p className="text-sm text-slate-500 mb-4">Hospitals, clinics and pharmacies across <strong>20+ Indian cities</strong>.</p>
+          <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+            <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/40 text-teal-600 rounded-xl flex items-center justify-center text-lg mb-4">🏥</div>
+            <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 mb-2">Find Nearby Help</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Hospitals, clinics and pharmacies across <strong>20+ Indian cities</strong>.</p>
             <button onClick={() => onNavigate('map')} className="text-teal-600 font-bold text-sm hover:text-teal-700 transition-colors flex items-center gap-1">
               Open Map 🗺️
             </button>
@@ -134,14 +134,14 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
         </div>
 
         {/* Quick Symptom Access */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h3 className="text-lg font-black text-slate-900 mb-4">Quick Symptom Access</h3>
+        <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+          <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 mb-4">Quick Symptom Access</h3>
           <div className="flex flex-wrap gap-2">
             {["High Fever","Bleeding","Body Pain","Dizziness","Vomiting","Chest Pain","Breathing Issue","Burns","Fracture","Animal Bite","Food Poisoning","Allergic Reaction"].map(s => (
               <button 
                 key={s}
                 onClick={() => onQuickSymptom(s)}
-                className="px-4 py-2 bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-teal-700 text-xs font-bold rounded-full border border-slate-200 hover:border-teal-200 transition-all active:scale-[0.95]"
+                className="px-4 py-2 bg-slate-50 dark:bg-slate-700/50 hover:bg-teal-50 dark:hover:bg-teal-900/30 text-slate-700 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-600 hover:border-teal-200 transition-all active:scale-[0.95]"
               >
                 {s}
               </button>
@@ -151,15 +151,15 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
 
         {/* Bottom Features Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
-            <div className="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center text-lg mb-3">🗣️</div>
-            <h3 className="text-lg font-black text-slate-900 mb-1">Offline Translation</h3>
-            <p className="text-sm text-slate-500">20+ medical phrases translated to 8 Indian languages instantly.</p>
+          <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+            <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-xl flex items-center justify-center text-lg mb-3">🗣️</div>
+            <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 mb-1">Offline Translation</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">20+ medical phrases translated to 8 Indian languages instantly.</p>
           </div>
-          <div className="bg-teal-50 border border-teal-100 rounded-2xl p-6">
-            <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center text-lg mb-3">📋</div>
-            <h3 className="text-lg font-black text-slate-900 mb-1">Vitals Sync</h3>
-            <p className="text-sm text-slate-500">Store medical history and allergies locally for first responders to access instantly.</p>
+          <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800/50 rounded-2xl p-6">
+            <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/40 rounded-xl flex items-center justify-center text-lg mb-3">📋</div>
+            <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 mb-1">Vitals Sync</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Store medical history and allergies locally for first responders to access instantly.</p>
           </div>
         </div>
       </section>
@@ -170,6 +170,11 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
 export default function App() {
   const [screen, setScreen] = useState('dashboard');
   const [analysis, setAnalysis] = useState(null);
+  const [dark, setDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+  }, [dark]);
 
   const handleAnalysisComplete = (result) => {
     setAnalysis(result);
@@ -190,7 +195,7 @@ export default function App() {
   const activeTab = screen === 'dashboard' ? 'dashboard' : screen === 'map' ? 'hospitals' : 'guidance';
 
   return (
-    <div className="h-[100dvh] bg-white flex flex-col font-sans overflow-hidden">
+    <div className="h-[100dvh] bg-white dark:bg-black flex flex-col font-sans overflow-hidden">
       <OfflineBanner />
       
       {/* Teal Navbar */}
@@ -224,28 +229,46 @@ export default function App() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <button className="text-slate-400 hover:text-white p-2 transition-colors text-sm">⚙️</button>
+          <button
+            onClick={() => setDark(d => !d)}
+            className="text-slate-400 hover:text-white p-2 transition-colors rounded-lg hover:bg-slate-700"
+            title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {dark ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            )}
+          </button>
           <a href="tel:112" className="bg-teal-600 hover:bg-teal-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-colors active:scale-[0.95]">Emergency</a>
         </div>
       </header>
 
       {/* Mobile Bottom Nav */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex z-50 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 flex z-50 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
         <button 
           onClick={() => { setScreen('dashboard'); setAnalysis(null); }}
-          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'dashboard' ? 'text-teal-600' : 'text-slate-400'}`}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'dashboard' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
         >
           <span className="text-base">🏠</span>Home
         </button>
         <button
           onClick={() => setScreen('input')}
-          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'guidance' ? 'text-teal-600' : 'text-slate-400'}`}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'guidance' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
         >
           <span className="text-base">🩺</span>Guidance
         </button>
         <button
           onClick={() => setScreen('map')}
-          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'hospitals' ? 'text-teal-600' : 'text-slate-400'}`}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'hospitals' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
         >
           <span className="text-base">🏥</span>Hospitals
         </button>
@@ -283,7 +306,7 @@ export default function App() {
         )}
         
         {screen === 'map' && (
-          <div className="absolute inset-0 z-40 bg-white">
+          <div className="absolute inset-0 z-40 bg-white dark:bg-black">
             <MapScreen 
               onBack={() => setScreen(analysis ? 'guidance' : 'dashboard')} 
               requiredDoctorType={analysis?.doctor_type || analysis?.doctorType}
