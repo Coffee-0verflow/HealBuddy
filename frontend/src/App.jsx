@@ -198,41 +198,39 @@ export default function App() {
     <div className="h-[100dvh] bg-white dark:bg-black flex flex-col font-sans overflow-hidden">
       <OfflineBanner />
       
-      {/* Teal Navbar */}
-      <header className="bg-slate-800 text-white flex items-center gap-1 shrink-0 px-4 md:px-8 py-0 z-50 sticky top-0">
+      {/* Navbar */}
+      <header className="bg-slate-900 text-white flex items-center shrink-0 px-4 md:px-8 z-50 sticky top-0 border-b border-slate-700/50">
         <button 
           onClick={() => { setScreen('dashboard'); setAnalysis(null); }}
-          className="text-teal-400 font-black text-lg tracking-tight mr-4 py-3 hover:text-teal-300 transition-colors"
+          className="text-teal-400 font-black text-lg tracking-tight mr-6 py-4 hover:text-teal-300 transition-colors flex items-center gap-2"
         >
-          HealBuddy
+          🩺 HealBuddy
         </button>
         
-        <nav className="hidden sm:flex items-center gap-1 flex-1">
-          <button 
-            onClick={() => { setScreen('dashboard'); setAnalysis(null); }}
-            className={`px-3 py-3 text-xs font-bold transition-colors ${activeTab === 'dashboard' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-400 hover:text-white'}`}
-          >
-            Dashboard
-          </button>
-          <button 
-            onClick={() => setScreen('input')}
-            className={`px-3 py-3 text-xs font-bold transition-colors ${activeTab === 'guidance' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-400 hover:text-white'}`}
-          >
-            Guidance
-          </button>
-          <button 
-            onClick={() => setScreen('map')}
-            className={`px-3 py-3 text-xs font-bold transition-colors ${activeTab === 'hospitals' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-400 hover:text-white'}`}
-          >
-            Hospitals
-          </button>
+        <nav className="hidden sm:flex items-center gap-0 flex-1 h-full">
+          {[
+            { id: 'dashboard', label: 'Home', action: () => { setScreen('dashboard'); setAnalysis(null); } },
+            { id: 'guidance',  label: 'Guidance', action: () => setScreen('input') },
+            { id: 'hospitals', label: 'Hospitals', action: () => setScreen('map') },
+          ].map(item => (
+            <button
+              key={item.id}
+              onClick={item.action}
+              className={`px-4 py-4 text-sm font-semibold transition-all border-b-2 ${
+                activeTab === item.id
+                  ? 'text-teal-400 border-teal-400'
+                  : 'text-slate-400 border-transparent hover:text-slate-200 hover:border-slate-500'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
           <button
             onClick={() => setDark(d => !d)}
             className="text-slate-400 hover:text-white p-2 transition-colors rounded-lg hover:bg-slate-700"
-            title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {dark ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -248,35 +246,40 @@ export default function App() {
               </svg>
             )}
           </button>
-          <a href="tel:112" className="bg-teal-600 hover:bg-teal-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-colors active:scale-[0.95]">Emergency</a>
+          <a href="tel:112" className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors active:scale-[0.95] flex items-center gap-1.5">
+            🚨 Emergency
+          </a>
         </div>
       </header>
 
       {/* Mobile Bottom Nav */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 flex z-50 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700/80 flex z-50 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.12)]">
         <button 
           onClick={() => { setScreen('dashboard'); setAnalysis(null); }}
           className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'dashboard' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
         >
-          <span className="text-base">🏠</span>Home
+          <span className="text-lg">🏠</span>Home
+          {activeTab === 'dashboard' && <span className="w-1 h-1 rounded-full bg-teal-500 mt-0.5" />}
         </button>
         <button
           onClick={() => setScreen('input')}
           className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'guidance' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
         >
-          <span className="text-base">🩺</span>Guidance
+          <span className="text-lg">🩺</span>Guidance
+          {activeTab === 'guidance' && <span className="w-1 h-1 rounded-full bg-teal-500 mt-0.5" />}
         </button>
         <button
           onClick={() => setScreen('map')}
           className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'hospitals' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
         >
-          <span className="text-base">🏥</span>Hospitals
+          <span className="text-lg">🏥</span>Hospitals
+          {activeTab === 'hospitals' && <span className="w-1 h-1 rounded-full bg-teal-500 mt-0.5" />}
         </button>
         <a
           href="tel:112"
           className="flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold text-red-500"
         >
-          <span className="text-base">🚨</span>SOS
+          <span className="text-lg">🚨</span>SOS
         </a>
       </div>
 
