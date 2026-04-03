@@ -1,10 +1,10 @@
 export default function EmergencyOverlay({ onDismiss }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(127,0,0,0.92)', backdropFilter: 'blur(4px)', padding: 16 }}>
-      <div style={{ background: 'var(--bg-surface)', borderRadius: 16, maxWidth: 384, width: '100%', padding: 24, boxShadow: '0 25px 50px rgba(0,0,0,0.5)', textAlign: 'center' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-red-950/90 backdrop-blur-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center border border-red-200 dark:border-red-900">
         <div className="text-5xl mb-3">🚨</div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: '#f87171' }}>Emergency Detected</h2>
-        <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>
+        <h2 className="text-2xl font-bold mb-2 text-red-500">Emergency Detected</h2>
+        <p className="text-sm mb-5 text-slate-600 dark:text-slate-300">
           Your symptoms suggest a potentially life-threatening situation. Please seek emergency care immediately.
         </p>
         <div className="space-y-3 mb-5">
@@ -15,7 +15,7 @@ export default function EmergencyOverlay({ onDismiss }) {
             🚑 Call 108 — Ambulance
           </a>
         </div>
-        <button onClick={onDismiss} className="text-sm underline" style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
+        <button onClick={onDismiss} className="text-sm underline text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
           I understand — continue to guidance
         </button>
       </div>
