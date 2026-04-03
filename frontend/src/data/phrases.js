@@ -69,3 +69,15 @@ export const phrases = [
   { id:"n9", category:"navigation", en:"Where is the emergency ward?", hi:"आपातकालीन वार्ड कहाँ है?", ta:"அவசர சிகிச்சை பிரிவு எங்கே?", te:"అత్యవసర వార్డు ఎక్కడ ఉంది?" },
   { id:"n10", category:"navigation", en:"Can you show me on the map?", hi:"क्या आप मुझे नक्शे पर दिखा सकते हैं?", ta:"நீங்கள் வரைபடத்தில் காட்ட முடியுமா?", te:"మీరు నాకు మ్యాప్‌లో చూపించగలరా?" },
 ];
+
+// Build a fallbackPhrases dict from the array: { "English text": { Hindi: "...", Tamil: "...", ... } }
+const langMap = { hi: "Hindi", ta: "Tamil", te: "Telugu" };
+export const fallbackPhrases = {};
+for (const p of phrases) {
+  const entry = {};
+  if (p.hi) entry.Hindi = p.hi;
+  if (p.ta) entry.Tamil = p.ta;
+  if (p.te) entry.Telugu = p.te;
+  // Add more as available
+  if (Object.keys(entry).length > 0) fallbackPhrases[p.en] = entry;
+}
