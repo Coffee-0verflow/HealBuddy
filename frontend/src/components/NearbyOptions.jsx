@@ -48,14 +48,12 @@ function FacilityCard({ facility, rank, isSelected, onSelect }) {
         boxShadow: isSelected ? '0 0 0 3px rgba(37,99,235,0.2)' : rank === 0 ? '0 0 0 3px rgba(37,99,235,0.1)' : undefined,
       }}>
       {rank === 0 && !isSelected && (
-        <div className="px-3 py-1.5 text-xs font-semibold text-white flex items-center gap-1.5"
-          style={{ background: '#2563eb' }}>
+        <div className="px-3 py-1.5 text-xs font-semibold text-white flex items-center gap-1.5 bg-blue-600">
           ⭐ Top Recommendation
         </div>
       )}
       {isSelected && (
-        <div className="px-3 py-1.5 text-xs font-semibold text-white flex items-center gap-1.5"
-          style={{ background: '#2563eb' }}>
+        <div className="px-3 py-1.5 text-xs font-semibold text-white flex items-center gap-1.5 bg-blue-600">
           📍 Selected on Map
         </div>
       )}
@@ -76,8 +74,8 @@ function FacilityCard({ facility, rank, isSelected, onSelect }) {
           <CostBadge badge={facility.costBadge} />
           <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{costStr} consult</span>
           {facility.openNow
-            ? <span className="text-xs font-medium" style={{ color: '#16a34a' }}>● Open Now</span>
-            : <span className="text-xs font-medium" style={{ color: '#dc2626' }}>● Closed</span>
+            ? <span className="text-xs font-medium text-green-600 dark:text-green-400">● Open Now</span>
+            : <span className="text-xs font-medium text-red-600 dark:text-red-400">● Closed</span>
           }
         </div>
 
@@ -91,8 +89,8 @@ function FacilityCard({ facility, rank, isSelected, onSelect }) {
           <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{facility.languages.join(' · ')}</span>
         </div>
 
-        <div className="rounded-xl p-3 mb-3" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-          <p className="text-xs text-blue-700 leading-relaxed">
+        <div className="rounded-xl p-3 mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50">
+          <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
             <span className="font-semibold">Why recommended: </span>{facility.whyRecommended}
           </p>
         </div>
@@ -101,15 +99,13 @@ function FacilityCard({ facility, rank, isSelected, onSelect }) {
           {facility.phone && (
             <a href={`tel:${facility.phone}`}
               onClick={e => e.stopPropagation()}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold text-white"
-              style={{ background: '#2563eb' }}>
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors">
               📞 Call
             </a>
           )}
           <button
             onClick={e => { e.stopPropagation(); navigate(facility); }}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold text-white"
-            style={{ background: '#16a34a' }}>
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
             🗺 Navigate
           </button>
           <button onClick={e => { e.stopPropagation(); setExpanded(!expanded); }}
@@ -129,13 +125,13 @@ function FacilityCard({ facility, rank, isSelected, onSelect }) {
             )}
             <div className="flex justify-between text-xs">
               <span style={{ color: 'var(--text-muted)' }}>Digital payment</span>
-              <span className="font-medium" style={{ color: facility.digitalPayment ? '#16a34a' : 'var(--text-muted)' }}>
+              <span className={`font-medium ${facility.digitalPayment ? 'text-green-600 dark:text-green-400' : 'text-slate-400 dark:text-slate-500'}`}>
                 {facility.digitalPayment ? 'Yes (UPI / Card)' : 'Cash only'}
               </span>
             </div>
             <div className="flex justify-between text-xs">
               <span style={{ color: 'var(--text-muted)' }}>Tourist friendly</span>
-              <span className="font-medium" style={{ color: facility.touristFriendly ? '#16a34a' : 'var(--text-muted)' }}>
+              <span className={`font-medium ${facility.touristFriendly ? 'text-green-600 dark:text-green-400' : 'text-slate-400 dark:text-slate-500'}`}>
                 {facility.touristFriendly ? 'Yes' : 'Not specifically'}
               </span>
             </div>
@@ -325,8 +321,7 @@ export default function NearbyOptions({ city, urgency = 'clinic', specialties = 
           {bounds ? `Showing ${visibleFacilities.length} facilities in current map view` : 'All facilities'}
         </p>
         {city && recommendations.length > 0 && (
-          <span className="text-xs px-2 py-1 rounded-lg font-medium"
-            style={{ background: '#eff6ff', color: '#2563eb' }}>
+          <span className="text-xs px-2 py-1 rounded-lg font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
             ⭐ {recommendations.length} recommended for {cityObj?.label}
           </span>
         )}
