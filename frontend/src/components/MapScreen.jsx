@@ -51,6 +51,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
+function StateZoomer({ selectedState }) {
+  const map = useMap();
+  useEffect(() => {
+    if (selectedState === 'All States') {
+      map.setView([20.5937, 78.9629], 5, { animate: true });
+    } else if (STATE_CENTERS[selectedState]) {
+      map.setView(STATE_CENTERS[selectedState], 7, { animate: true });
+    }
+  }, [selectedState, map]);
+  return null;
+}
+
 function MapUpdater({ center }) {
   const map = useMap();
   useEffect(() => {
@@ -245,7 +257,8 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
           <div className={`w-full relative z-0 shadow-inner shrink-0 transition-all duration-300 ${mapExpanded ? 'h-[calc(100vh-140px)]' : 'h-[35vh] sm:h-[40vh]'}`}>
             <MapContainer center={[userLocation.lat, userLocation.lng]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
               <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <MapUpdater center={[userLocation.lat, userLocation.lng]} />
+              <StateZoomer selectedState={selectedState} />
+              {selectedState === 'All States' && <MapUpdater center={[userLocation.lat, userLocation.lng]} />}
               <LocationPicker onSelect={processDoctors} />
               {routeCoords && <RouteFitter routeCoords={routeCoords} />}
               {routeCoords && <Polyline positions={routeCoords} pathOptions={{ color: '#4f46e5', weight: 5, opacity: 0.85, dashArray: '12, 8' }} />}
