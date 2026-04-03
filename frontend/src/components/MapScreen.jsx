@@ -200,17 +200,6 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
   const clearRoute = () => { setRouteCoords(null); setRouteInfo(null); };
 
   return (
-<<<<<<< HEAD
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden pb-[70px]">
-      {/* Header */}
-      <div className="absolute top-0 w-full z-[1000] p-3 pointer-events-none">
-        <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-white/50 dark:border-slate-700 shadow-lg px-4 py-2.5 rounded-2xl flex items-center justify-between gap-3 pointer-events-auto flex-wrap">
-          <div className="flex items-center gap-3">
-            <button onClick={onBack} className="text-slate-600 dark:text-slate-300 font-bold px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all active:scale-[0.95]">← Back</button>
-            <div>
-              <h2 className="font-black text-slate-800 dark:text-slate-100 leading-tight text-sm">Nearby Hospitals</h2>
-              <p className="text-[9px] uppercase font-black tracking-widest text-indigo-600 dark:text-indigo-400">{requiredDoctorType || 'All Facilities'}</p>
-=======
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 relative overflow-hidden pb-[70px]">
       {/* Header */}
       <div className="absolute top-0 w-full z-[1000] p-3 pointer-events-none">
@@ -220,7 +209,6 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
             <div>
               <h2 className="font-black text-slate-800 dark:text-slate-100 leading-tight text-sm">Nearby Hospitals</h2>
               <p className="text-[9px] uppercase font-black tracking-widest text-indigo-600">{requiredDoctorType || 'All Facilities'}</p>
->>>>>>> 60b0072ba41ad1c58a158bac25140b4164a65391
             </div>
           </div>
           {/* State dropdown */}
@@ -237,11 +225,7 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
       </div>
 
       {loading && (
-<<<<<<< HEAD
-        <div className="flex-1 flex justify-center items-center bg-slate-50 dark:bg-slate-900">
-=======
         <div className="flex-1 flex justify-center items-center bg-slate-50 dark:bg-slate-950">
->>>>>>> 60b0072ba41ad1c58a158bac25140b4164a65391
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
             <p className="text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase text-sm">Locating you...</p>
@@ -320,32 +304,20 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
           </div>
 
           {/* Hospital Cards */}
-<<<<<<< HEAD
-          <div className="flex-1 bg-slate-50 dark:bg-slate-900 overflow-y-auto px-3 sm:px-5 pt-5 pb-6 -mt-3 relative z-10 rounded-t-3xl border-t border-slate-200/50 dark:border-slate-700/50 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
-=======
           <div className="flex-1 bg-slate-50 dark:bg-slate-950 overflow-y-auto px-3 sm:px-5 pt-5 pb-6 -mt-3 relative z-10 rounded-t-3xl border-t border-slate-200/50 dark:border-slate-700/50 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
->>>>>>> 60b0072ba41ad1c58a158bac25140b4164a65391
             <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-4"></div>
             <h3 className="font-black text-lg text-slate-800 dark:text-slate-100 mb-4 ml-1">Top 5 Hospitals for You</h3>
             
             {/* Quick Comparison Table */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm mb-5 overflow-hidden">
-<<<<<<< HEAD
-              <div className="grid grid-cols-[1fr_60px_55px_60px] text-[9px] font-black uppercase tracking-widest text-slate-400 px-4 py-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
-=======
               <div className="grid grid-cols-[1fr_60px_55px_60px] text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 px-4 py-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
->>>>>>> 60b0072ba41ad1c58a158bac25140b4164a65391
                 <span>Hospital</span><span className="text-center">Dist</span><span className="text-center">Rating</span><span className="text-center">Match</span>
               </div>
               {nearbyDocs.map((doc, i) => (
                 <div key={doc.id} className={`grid grid-cols-[1fr_60px_55px_60px] items-center px-4 py-2.5 ${i < nearbyDocs.length - 1 ? 'border-b border-slate-50 dark:border-slate-700/50' : ''} ${i === 0 ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''}`}>
                   <div>
                     <p className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate pr-2">{doc.name}</p>
-<<<<<<< HEAD
-                    <p className="text-[9px] text-slate-400">{doc.cost}</p>
-=======
                     <p className="text-[9px] text-slate-400 dark:text-slate-500">{doc.cost}</p>
->>>>>>> 60b0072ba41ad1c58a158bac25140b4164a65391
                   </div>
                   <p className="text-xs font-black text-center text-slate-700 dark:text-slate-300">{doc.distance.toFixed(0)}km</p>
                   <p className="text-xs font-bold text-center text-amber-500">⭐{doc.rating}</p>
@@ -362,11 +334,7 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
             {/* Detailed Cards */}
             <div className="space-y-4">
               {nearbyDocs.map((doc, index) => (
-<<<<<<< HEAD
-                <div key={doc.id} className={`bg-white dark:bg-slate-800 p-4 rounded-2xl border shadow-md relative overflow-hidden transition-colors ${routeInfo?.name === doc.name ? 'border-indigo-400 ring-2 ring-indigo-100 dark:ring-indigo-900' : 'border-slate-200 dark:border-slate-700'}`}>
-=======
                 <div key={doc.id} className={`bg-white dark:bg-slate-800 p-4 rounded-2xl border shadow-md relative overflow-hidden transition-colors ${routeInfo?.name === doc.name ? 'border-indigo-400 dark:border-indigo-500 ring-2 ring-indigo-100 dark:ring-indigo-900/50' : 'border-slate-200 dark:border-slate-700'}`}>
->>>>>>> 60b0072ba41ad1c58a158bac25140b4164a65391
                   
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1 min-w-0">
@@ -392,19 +360,11 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
 
                   <div className="grid grid-cols-2 gap-2 mt-3">
                     <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-2.5 border border-slate-100 dark:border-slate-600">
-<<<<<<< HEAD
-                      <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">Distance</p>
-                      <p className="font-black text-slate-800 dark:text-slate-100 text-base">{doc.distance.toFixed(1)} <span className="text-[10px] text-slate-500 font-bold">km</span></p>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-2.5 border border-slate-100 dark:border-slate-600">
-                      <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">Est. Cost</p>
-=======
                       <p className="text-[8px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">Distance</p>
                       <p className="font-black text-slate-800 dark:text-slate-100 text-base">{doc.distance.toFixed(1)} <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">km</span></p>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-2.5 border border-slate-100 dark:border-slate-600">
                       <p className="text-[8px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest">Est. Cost</p>
->>>>>>> 60b0072ba41ad1c58a158bac25140b4164a65391
                       <p className="font-black text-slate-800 dark:text-slate-100 text-base">{doc.cost}</p>
                     </div>
                   </div>
@@ -424,33 +384,6 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
                     </div>
                   )}
 
-<<<<<<< HEAD
-                    <div className="mt-3 border-t border-slate-100 dark:border-slate-700 pt-3">
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => handleNavigate(doc)}
-                          className={`flex-1 py-2 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 ${
-                            routeInfo?.name === doc.name 
-                              ? 'bg-green-600 text-white' 
-                              : 'bg-indigo-600 text-white active:scale-[0.97]'
-                          }`}
-                        >
-                          {routeInfo?.name === doc.name ? '✓ Routed' : '🧭 Navigate'}
-                        </button>
-                        {doc.phone && (
-                          <a href={`tel:${doc.phone.replace(/ /g, '')}`} className="flex-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2 rounded-xl font-bold text-sm shadow-sm flex items-center justify-center gap-1.5 active:scale-[0.97] transition-transform">
-                            📞 Call
-                          </a>
-                        )}
-                      </div>
-                      <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase">Lang:</span>
-                        {doc.languages.map(lang => (
-                          <span key={lang} className="bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded text-[9px] font-bold">{lang}</span>
-                        ))}
-                      </div>
-                    </div>
-=======
                   {/* Actions */}
                   <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
                     <div className="flex gap-2">
@@ -478,7 +411,6 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
                       ))}
                     </div>
                   </div>
->>>>>>> 60b0072ba41ad1c58a158bac25140b4164a65391
                 </div>
               ))}
             </div>
