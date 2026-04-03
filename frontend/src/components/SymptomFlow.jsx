@@ -38,8 +38,8 @@ export default function SymptomFlow({ symptomId, onResult, onBack }) {
             <div className="space-y-4">
               <div className="rounded-2xl p-5 shadow-sm"
                 style={{
-                  background: result.isEmergency ? '#fff1f2' : 'var(--bg-surface)',
-                  border: result.isEmergency ? '1px solid #fecdd3' : '1px solid var(--border)',
+                  background: 'var(--bg-surface)',
+                  border: result.isEmergency ? '2px solid #7f1d1d' : '1px solid var(--border)',
                 }}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">{symptom.icon}</span>
@@ -47,15 +47,15 @@ export default function SymptomFlow({ symptomId, onResult, onBack }) {
                 </div>
                 <div className="mb-3"><UrgencyPill config={result.config} /></div>
                 <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>{result.rationale}</p>
-                <div className="flex items-start gap-2 p-3 rounded-xl" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
+                <div className="flex items-start gap-2 p-3 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
                   <span className="text-base mt-0.5">ℹ️</span>
-                  <p className="text-xs text-amber-800">This is not a medical diagnosis. It is a guidance tool. Always consult a qualified doctor.</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>This is not a medical diagnosis. It is a guidance tool. Always consult a qualified doctor.</p>
                 </div>
               </div>
 
-              <div className="rounded-2xl p-4" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-1">Recommended Action</p>
-                <p className="text-base font-bold text-blue-800">{result.config.action}</p>
+              <div className="rounded-2xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#60a5fa' }}>Recommended Action</p>
+                <p className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{result.config.action}</p>
               </div>
 
               {result.isEmergency && (
@@ -108,7 +108,7 @@ export default function SymptomFlow({ symptomId, onResult, onBack }) {
             <button key={opt} onClick={() => handleAnswer(currentQ.id, opt)}
               className="text-left px-4 py-3.5 rounded-xl text-sm font-medium transition-all"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.borderColor = '#93c5fd'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-surface)'; e.currentTarget.style.borderColor = '#3b82f6'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.borderColor = 'var(--border)'; }}>
               {opt}
             </button>

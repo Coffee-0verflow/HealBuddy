@@ -26,15 +26,15 @@ export default function OfflineBanner({ inline = false }) {
   }
 
   if (online) return (
-    <div className="flex items-center gap-2 px-4 py-1.5 text-xs" style={{ background: '#f0fdf4', borderTop: '1px solid #bbf7d0', color: '#15803d' }}>
+    <div className="flex items-center gap-2 px-4 py-1.5 text-xs" style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border)', color: '#4ade80' }}>
       <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block" />
       Online — All features available
     </div>
   );
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 text-xs" style={{ background: '#fffbeb', borderTop: '1px solid #fde68a', color: '#92400e' }}>
-      <span className="w-2 h-2 rounded-full bg-amber-500 inline-block flex-shrink-0" />
+    <div className="flex items-center gap-2 px-4 py-2 text-xs" style={{ background: '#1c0a00', borderTop: '1px solid #7c2d12', color: '#fb923c' }}>
+      <span className="w-2 h-2 rounded-full bg-orange-500 inline-block flex-shrink-0" />
       <span><strong>Offline Mode</strong> — Triage, First Aid, and preloaded facility data still work.</span>
     </div>
   );

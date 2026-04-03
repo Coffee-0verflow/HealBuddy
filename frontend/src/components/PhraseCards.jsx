@@ -153,7 +153,7 @@ export default function PhraseCards() {
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>🔤 Translate Anything</p>
           <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-            style={{ background: '#dcfce7', color: '#15803d' }}>📦 Fully Offline</span>
+            style={{ background: 'var(--bg-elevated)', color: '#4ade80' }}>📦 Fully Offline</span>
         </div>
 
         {/* Language picker */}
@@ -182,17 +182,17 @@ export default function PhraseCards() {
         {translated && (
           <div className="rounded-xl p-4 space-y-2"
             style={{
-              background: translated.source === 'error' ? '#fffbeb' : '#eff6ff',
-              border: `1px solid ${translated.source === 'error' ? '#fde68a' : '#bfdbfe'}`,
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border)',
             }}>
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold" style={{ color: translated.source === 'error' ? '#92400e' : '#2563eb' }}>
+              <p className="text-xs font-semibold" style={{ color: translated.source === 'error' ? '#f87171' : '#60a5fa' }}>
                 {ALL_LANGS.find(l => l.key === translateLang)?.label}  {ALL_LANGS.find(l => l.key === translateLang)?.name}
               </p>
               <span className="text-xs px-2 py-0.5 rounded-full"
                 style={{
-                  background: translated.source === 'offline' ? '#fef9c3' : '#fef3c7',
-                  color: '#92400e',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-muted)',
                 }}>
                 {translated.source === 'offline' ? '📦 Offline' : '⚠️ Not found'}
               </span>
@@ -201,7 +201,7 @@ export default function PhraseCards() {
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Matched: "{translated.matched}"</p>
             )}
             <p className="text-base leading-relaxed font-medium"
-              style={{ color: translated.source === 'error' ? '#92400e' : '#1e40af' }}>
+              style={{ color: translated.source === 'error' ? '#f87171' : 'var(--text-primary)' }}>
               {translated.text}
             </p>
             {translated.source !== 'error' && (
@@ -239,16 +239,16 @@ export default function PhraseCards() {
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
             <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>English</p>
             <p className="text-sm font-bold mb-3" style={{ color: 'var(--text-primary)' }}>{phrase.english}</p>
-            <div className="rounded-xl p-3" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-              <p className="text-xs font-semibold text-blue-500 mb-1">{lang?.name}</p>
-              <p className="text-sm text-blue-800 leading-relaxed">{phrase[activeLang] || '—'}</p>
+            <div className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+              <p className="text-xs font-semibold mb-1" style={{ color: '#60a5fa' }}>{lang?.name}</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>{phrase[activeLang] || '—'}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="rounded-xl p-4" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
-        <p className="text-sm text-amber-700">
+      <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
           💡 <strong>Tip:</strong> Show the local language card to healthcare staff or locals. Text in brackets is the pronunciation guide.
         </p>
       </div>

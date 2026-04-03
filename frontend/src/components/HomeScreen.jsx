@@ -140,21 +140,21 @@ export default function HomeScreen({ onSelectSymptom, onSelectCity, selectedCity
                   onClick={() => onSelectSymptom(s.id)}
                   className="flex items-center gap-2.5 p-3.5 rounded-xl text-left transition-all active:scale-95 hover:shadow-md"
                   style={{
-                    background: s.category === 'emergency' ? 'var(--emergency-bg, #fff1f2)' : 'var(--bg-surface)',
-                    border: s.category === 'emergency' ? '1px solid #fecdd3' : '1px solid var(--border)',
+                    background: 'var(--bg-surface)',
+                    border: s.category === 'emergency' ? '1px solid #7f1d1d' : '1px solid var(--border)',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = s.category === 'emergency' ? '#f43f5e' : '#93c5fd';
-                    e.currentTarget.style.background = s.category === 'emergency' ? '#ffe4e6' : 'var(--bg-elevated)';
+                    e.currentTarget.style.borderColor = s.category === 'emergency' ? '#f87171' : '#3b82f6';
+                    e.currentTarget.style.background = 'var(--bg-elevated)';
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = s.category === 'emergency' ? '#fecdd3' : 'var(--border)';
-                    e.currentTarget.style.background = s.category === 'emergency' ? 'var(--emergency-bg, #fff1f2)' : 'var(--bg-surface)';
+                    e.currentTarget.style.borderColor = s.category === 'emergency' ? '#7f1d1d' : 'var(--border)';
+                    e.currentTarget.style.background = 'var(--bg-surface)';
                   }}
                 >
                   <span className="text-2xl flex-shrink-0">{s.icon}</span>
                   <span className="text-sm font-medium leading-tight"
-                    style={{ color: s.category === 'emergency' ? '#be123c' : 'var(--text-primary)' }}>
+                    style={{ color: s.category === 'emergency' ? '#f87171' : 'var(--text-primary)' }}>
                     {s.label}
                   </span>
                 </button>
@@ -192,8 +192,8 @@ export default function HomeScreen({ onSelectSymptom, onSelectCity, selectedCity
             ))}
           </div>
 
-          <div className="rounded-xl p-3" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
-            <p className="text-xs text-amber-700 leading-relaxed">
+          <div className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
               ⚠️ HealBuddy provides guidance, not diagnosis. Always seek professional medical care for serious symptoms.
             </p>
           </div>
