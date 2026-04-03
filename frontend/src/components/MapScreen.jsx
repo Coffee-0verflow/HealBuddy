@@ -382,7 +382,7 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
               </div>
             )}
             
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-[400]">
+            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2 z-[400]">
               <div className="bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 shadow-2xl rounded-full text-[10px] font-black tracking-wider uppercase border border-slate-700/50 whitespace-nowrap">
                 🎯 Tap to set location
               </div>
