@@ -443,6 +443,7 @@ export default function App() {
             <MapScreen 
               onBack={() => setScreen(analysis ? 'guidance' : 'dashboard')} 
               requiredDoctorType={analysis?.doctor_type || analysis?.doctorType}
+              showPharmacies={analysis?.showPharmacyMode === true}
             />
           </div>
         )}
