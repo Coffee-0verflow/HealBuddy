@@ -4,29 +4,26 @@ import { firstAidGuides } from '../data/firstaid';
 function GuideDetail({ guide, onBack }) {
   return (
     <div className="space-y-5 pb-10">
-      <button onClick={onBack} className="flex items-center gap-1.5 text-sm transition-colors"
-        style={{ color: 'var(--text-muted)' }}
-        onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
-        onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
+      <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition-colors">
         ← All Guides
       </button>
 
       <div className="flex items-center gap-4">
         <span className="text-5xl">{guide.icon}</span>
         <div>
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{guide.label}</h2>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Offline first-aid guide</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{guide.label}</h2>
+          <p className="text-sm mt-0.5 text-slate-400 dark:text-slate-500">Offline first-aid guide</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="rounded-2xl p-5 shadow-sm" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--text-muted)' }}>Steps to Follow</p>
+        <div className="rounded-2xl p-5 shadow-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-4 text-slate-400 dark:text-slate-500">Steps to Follow</p>
           <ol className="space-y-4">
             {guide.steps.map((step, i) => (
               <li key={i} className="flex gap-3">
                 <span className="flex-shrink-0 w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center mt-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">{i + 1}</span>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{step}</p>
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{step}</p>
               </li>
             ))}
           </ol>
@@ -51,16 +48,10 @@ function GuideDetail({ guide, onBack }) {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <a href="tel:112" className="flex items-center justify-center gap-2 py-3.5 text-white rounded-xl font-bold text-sm transition-colors"
-              style={{ background: '#dc2626' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#b91c1c'}
-              onMouseLeave={e => e.currentTarget.style.background = '#dc2626'}>
+            <a href="tel:112" className="flex items-center justify-center gap-2 py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-colors">
               📞 Call 112
             </a>
-            <a href="tel:108" className="flex items-center justify-center gap-2 py-3.5 text-white rounded-xl font-bold text-sm transition-colors"
-              style={{ background: '#f97316' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#ea580c'}
-              onMouseLeave={e => e.currentTarget.style.background = '#f97316'}>
+            <a href="tel:108" className="flex items-center justify-center gap-2 py-3.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-sm transition-colors">
               🚑 Call 108
             </a>
           </div>
@@ -82,26 +73,22 @@ export default function FirstAid() {
     <div className="space-y-5 pb-10">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>First Aid</p>
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Offline Guides</h2>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>All guides work without internet. Tap any scenario for step-by-step help.</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-slate-400 dark:text-slate-500">First Aid</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Offline Guides</h2>
+          <p className="text-sm mt-1 text-slate-500 dark:text-slate-400">All guides work without internet. Tap any scenario for step-by-step help.</p>
         </div>
-        <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl"
-          style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+        <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50">
           <span className="text-sm">✅</span>
-          <span className="text-xs font-medium text-green-700 whitespace-nowrap">Works Offline</span>
+          <span className="text-xs font-medium text-green-700 dark:text-green-400 whitespace-nowrap">Works Offline</span>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
         {firstAidGuides.map(guide => (
           <button key={guide.id} onClick={() => setSelected(guide.id)}
-            className="flex flex-col items-start gap-2.5 p-4 rounded-2xl text-left transition-all active:scale-95 group"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.borderColor = '#93c5fd'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-surface)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}>
+            className="flex flex-col items-start gap-2.5 p-4 rounded-2xl text-left transition-all active:scale-95 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md">
             <span className="text-3xl">{guide.icon}</span>
-            <span className="text-sm font-semibold leading-tight" style={{ color: 'var(--text-primary)' }}>{guide.label}</span>
+            <span className="text-sm font-semibold leading-tight text-slate-800 dark:text-slate-200">{guide.label}</span>
           </button>
         ))}
       </div>
