@@ -250,8 +250,11 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
               {routeCoords && <RouteFitter routeCoords={routeCoords} />}
               {routeCoords && <Polyline positions={routeCoords} pathOptions={{ color: '#4f46e5', weight: 5, opacity: 0.85, dashArray: '12, 8' }} />}
 
-              <Marker position={[userLocation.lat, userLocation.lng]} zIndexOffset={1000}>
-                <Popup><span className="font-bold">📍 You are here</span><br/><span className="text-xs">Tap anywhere to relocate</span></Popup>
+              <Marker position={[userLocation.lat, userLocation.lng]} zIndexOffset={1000} icon={L.divIcon({
+                html: `<div style="background:#dc2626;color:#fff;border:3px solid #fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(220,38,38,0.6);">📍</div>`,
+                className: '', iconSize: [32, 32], iconAnchor: [16, 16]
+              })}>
+                <Popup><span className="font-bold" style={{color:'#dc2626'}}>📍 You are here</span><br/><span className="text-xs">Tap anywhere to relocate</span></Popup>
               </Marker>
 
               {filteredDoctors.map(doc => (
