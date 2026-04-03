@@ -3,6 +3,7 @@ import OfflineBanner from './components/OfflineBanner';
 import SymptomFlow from './components/SymptomFlow';
 import Guidance from './components/Guidance';
 import MapScreen from './components/MapScreen';
+import FirstAid from './components/FirstAid';
 
 const SYMPTOM_ICONS = {
   "Fever": "🌡️",
@@ -13,9 +14,49 @@ const SYMPTOM_ICONS = {
   "Dehydration": "💧",
 };
 
+const HOW_IT_WORKS_STEPS = [
+  { icon: '🩺', label: 'Select Symptom', desc: '10 categories to choose from', color: 'bg-teal-500' },
+  { icon: '❓', label: 'Answer Questions', desc: '2–5 targeted follow-up questions', color: 'bg-blue-500' },
+  { icon: '🚨', label: 'Red Flag Check', desc: 'Emergency triggers instant 112/108 prompt', color: 'bg-red-500' },
+  { icon: '📊', label: 'Urgency Classified', desc: 'Self-care → Pharmacy → Clinic → Hospital → Emergency', color: 'bg-orange-500' },
+  { icon: '🏥', label: 'Find Nearby Care', desc: 'Facilities scored by trust, cost & language', color: 'bg-purple-500' },
+];
+
+function HowItWorksModal({ onClose }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-black text-slate-900 dark:text-slate-100">How HealBuddy Works</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xl leading-none">✕</button>
+        </div>
+        <div className="flex flex-col">
+          {HOW_IT_WORKS_STEPS.map((step, i) => (
+            <div key={i} className="flex gap-4">
+              <div className="flex flex-col items-center">
+                <div className={`w-10 h-10 rounded-xl ${step.color} flex items-center justify-center text-white text-lg shrink-0 shadow-md`}>{step.icon}</div>
+                {i < HOW_IT_WORKS_STEPS.length - 1 && <div className="w-0.5 h-8 bg-slate-200 dark:bg-slate-700 my-1" />}
+              </div>
+              <div className="pb-5">
+                <p className="font-bold text-sm text-slate-900 dark:text-slate-100">{step.label}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="p-3 bg-teal-50 dark:bg-teal-900/20 rounded-xl border border-teal-100 dark:border-teal-800/50">
+          <p className="text-xs text-teal-700 dark:text-teal-400 font-medium">📡 All steps run entirely offline — no internet needed.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard({ onNavigate, onQuickSymptom }) {
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
   return (
     <div className="min-h-full">
+      {showHowItWorks && <HowItWorksModal onClose={() => setShowHowItWorks(false)} />}
       {/* Hero */}
       <section className="text-center pt-12 pb-10 px-4">
         <div className="inline-flex items-center gap-2 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 text-xs font-bold px-4 py-1.5 rounded-full border border-teal-200 dark:border-teal-800 mb-6">
@@ -29,13 +70,13 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
         </p>
         <div className="flex gap-3 justify-center">
           <button 
-            onClick={() => onNavigate('input')}
+            onClick={() => onNavigate('pick')}
             className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.97]"
           >
             Start Now
           </button>
           <button 
-            onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => setShowHowItWorks(true)}
             className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-[0.97]"
           >
             How it works
@@ -87,7 +128,7 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
             <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white text-lg mb-4 shadow-md">🩹</div>
             <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 mb-2">First Aid Guide</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Step-by-step instructions for <strong>10 scenarios</strong>. Works offline.</p>
-            <button onClick={() => onNavigate('input')} className="text-teal-600 font-bold text-sm hover:text-teal-700 transition-colors flex items-center gap-1">
+            <button onClick={() => onNavigate('firstaid')} className="text-teal-600 font-bold text-sm hover:text-teal-700 transition-colors flex items-center gap-1">
               View Guides →
             </button>
           </div>
@@ -125,7 +166,7 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
             </div>
 
             <button 
-              onClick={() => onNavigate('input')}
+              onClick={() => onNavigate('pick')}
               className="bg-white text-teal-700 px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-teal-50 transition-colors active:scale-[0.97]"
             >
               Start Assessment
@@ -167,8 +208,46 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
   );
 }
 
+const ALL_SYMPTOMS = [
+  { id: 'fever',          label: 'Fever',                   icon: '🌡️', color: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800/50 text-orange-700 dark:text-orange-400' },
+  { id: 'stomach',        label: 'Stomach Issue',           icon: '🤢', color: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800/50 text-yellow-700 dark:text-yellow-400' },
+  { id: 'injury',         label: 'Injury / Wound',          icon: '🩹', color: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400' },
+  { id: 'breathing',      label: 'Breathing Problem',       icon: '😮‍💨', color: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400' },
+  { id: 'chest_pain',     label: 'Chest Pain',              icon: '💔', color: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400' },
+  { id: 'dehydration',    label: 'Dehydration',             icon: '💧', color: 'bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800/50 text-cyan-700 dark:text-cyan-400' },
+  { id: 'allergy',        label: 'Allergic Reaction',       icon: '🤧', color: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800/50 text-purple-700 dark:text-purple-400' },
+  { id: 'womens_health',  label: "Women's Health",          icon: '🌸', color: 'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-800/50 text-pink-700 dark:text-pink-400' },
+  { id: 'child_health',   label: 'Child Health',            icon: '👶', color: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400' },
+  { id: 'senior_emergency', label: 'Senior Emergency',      icon: '👴', color: 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300' },
+];
+
+function SymptomPicker({ onSelect, onBack }) {
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      <button onClick={onBack} className="text-sm text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 mb-6 flex items-center gap-1">
+        ← Back
+      </button>
+      <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 mb-2">What's the concern?</h2>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Select the symptom category that best matches the situation.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {ALL_SYMPTOMS.map(s => (
+          <button
+            key={s.id}
+            onClick={() => onSelect(s.id)}
+            className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 font-bold text-sm transition-all active:scale-[0.97] hover:scale-[1.02] ${s.color}`}
+          >
+            <span className="text-3xl">{s.icon}</span>
+            <span className="text-center leading-tight">{s.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [screen, setScreen] = useState('dashboard');
+  const [symptomId, setSymptomId] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [dark, setDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
 
@@ -181,18 +260,25 @@ export default function App() {
     setScreen('guidance');
   };
 
-  const handleQuickSymptom = async (symptom) => {
-    const { analyzeSymptomsOffline } = await import('./logic/ai');
-    try {
-      const result = await analyzeSymptomsOffline(symptom);
-      setAnalysis(result);
-      setScreen('guidance');
-    } catch (err) {
-      console.error(err);
-    }
+  const handleQuickSymptom = (symptomText) => {
+    const lower = symptomText.toLowerCase();
+    const match = ALL_SYMPTOMS.find(s =>
+      lower.includes(s.label.toLowerCase()) ||
+      lower.includes(s.id.replace('_', ' '))
+    );
+    const id = match?.id ||
+      (lower.includes('chest') ? 'chest_pain' :
+       lower.includes('breath') ? 'breathing' :
+       lower.includes('stomach') || lower.includes('vomit') || lower.includes('poison') ? 'stomach' :
+       lower.includes('injur') || lower.includes('bleed') || lower.includes('burn') || lower.includes('fracture') || lower.includes('wound') ? 'injury' :
+       lower.includes('allerg') ? 'allergy' :
+       lower.includes('dizz') || lower.includes('dehydr') ? 'dehydration' :
+       'fever');
+    setSymptomId(id);
+    setScreen('input');
   };
 
-  const activeTab = screen === 'dashboard' ? 'dashboard' : screen === 'map' ? 'hospitals' : 'guidance';
+  const activeTab = screen === 'dashboard' ? 'dashboard' : screen === 'map' ? 'hospitals' : screen === 'firstaid' ? 'firstaid' : 'guidance';
 
   return (
     <div className="h-[100dvh] bg-white dark:bg-black flex flex-col font-sans overflow-hidden">
@@ -210,7 +296,8 @@ export default function App() {
         <nav className="hidden sm:flex items-center gap-0 flex-1 h-full">
           {[
             { id: 'dashboard', label: 'Home', action: () => { setScreen('dashboard'); setAnalysis(null); } },
-            { id: 'guidance',  label: 'Guidance', action: () => setScreen('input') },
+            { id: 'guidance',  label: 'Guidance', action: () => setScreen('pick') },
+            { id: 'firstaid',  label: 'First Aid', action: () => setScreen('firstaid') },
             { id: 'hospitals', label: 'Hospitals', action: () => setScreen('map') },
           ].map(item => (
             <button
@@ -262,11 +349,18 @@ export default function App() {
           {activeTab === 'dashboard' && <span className="w-1 h-1 rounded-full bg-teal-500 mt-0.5" />}
         </button>
         <button
-          onClick={() => setScreen('input')}
+          onClick={() => setScreen('pick')}
           className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'guidance' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
         >
-          <span className="text-lg">🩺</span>Guidance
+          <span className="text-lg">🩺</span>Triage
           {activeTab === 'guidance' && <span className="w-1 h-1 rounded-full bg-teal-500 mt-0.5" />}
+        </button>
+        <button
+          onClick={() => setScreen('firstaid')}
+          className={`flex-1 py-3 flex flex-col items-center gap-0.5 text-[10px] font-bold transition-colors ${activeTab === 'firstaid' ? 'text-teal-500' : 'text-slate-400 dark:text-slate-500'}`}
+        >
+          <span className="text-lg">🩹</span>First Aid
+          {activeTab === 'firstaid' && <span className="w-1 h-1 rounded-full bg-teal-500 mt-0.5" />}
         </button>
         <button
           onClick={() => setScreen('map')}
@@ -289,9 +383,32 @@ export default function App() {
           <Dashboard onNavigate={setScreen} onQuickSymptom={handleQuickSymptom} />
         )}
 
-        {screen === 'input' && (
+        {screen === 'firstaid' && (
+          <div className="max-w-4xl mx-auto px-4 py-6">
+            <button
+              onClick={() => setScreen('dashboard')}
+              className="flex items-center gap-1.5 text-sm mb-6 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            >
+              ← Back
+            </button>
+            <FirstAid />
+          </div>
+        )}
+
+        {screen === 'pick' && (
+          <SymptomPicker
+            onSelect={id => { setSymptomId(id); setScreen('input'); }}
+            onBack={() => setScreen('dashboard')}
+          />
+        )}
+
+        {screen === 'input' && symptomId && (
           <div className="max-w-3xl mx-auto px-2 py-4">
-            <SymptomFlow onAnalysisComplete={handleAnalysisComplete} />
+            <SymptomFlow
+              symptomId={symptomId}
+              onResult={(result) => { setAnalysis(result); setScreen('guidance'); }}
+              onBack={() => setScreen('pick')}
+            />
           </div>
         )}
         
