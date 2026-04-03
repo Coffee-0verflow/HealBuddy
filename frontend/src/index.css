@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+/* ── Tailwind v4: force class-based dark mode ── */
+@variant dark (&:where(.dark, .dark *));
+
+/* ── Design tokens ── */
+@layer base {
+  :root {
+    --bg-base:       #f8fafc;
+    --bg-surface:    #ffffff;
+    --bg-elevated:   #f1f5f9;
+    --border:        #e2e8f0;
+    --text-primary:  #0f172a;
+    --text-secondary:#475569;
+    --text-muted:    #94a3b8;
+    --sidebar-w:     260px;
+  }
+
+  .dark {
+    --bg-base:       #0a0f1e;
+    --bg-surface:    #111827;
+    --bg-elevated:   #1e2535;
+    --border:        #1f2937;
+    --text-primary:  #f1f5f9;
+    --text-secondary:#94a3b8;
+    --text-muted:    #4b5563;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Calm mode */
+  .calm { filter: saturate(0.65) brightness(1.02); }
+
+  /* Custom scrollbar for desktop */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+  .dark ::-webkit-scrollbar-thumb { background: #374151; }
+
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+/* ── App shell ── */
+.app-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-base);
+}
+
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  height: 100vh;
+  overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.main-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.app-header {
+  flex-shrink: 0;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.bottom-nav {
+  flex-shrink: 0;
+  background-color: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Surface cards */
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Nav item active */
+.nav-item-active {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.nav-item-inactive {
+  color: var(--text-secondary);
+}
+
+.nav-item-inactive:hover {
+  background-color: var(--bg-elevated);
+}
