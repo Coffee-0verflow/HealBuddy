@@ -1,8 +1,47 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { doctors } from '../data/doctors';
 import { getCurrentLocation, getDistanceInKm } from '../logic/distance';
+
+// State mapping by ID range
+const STATE_MAP = {
+  'Jammu, Kashmir & Ladakh': [1,2,3,4,5,6],
+  'Delhi & NCR': [7,8,9,10,11,12,13,14,15,16],
+  'Punjab, Chandigarh & Himachal': [17,18,19,20,21],
+  'Uttarakhand': [22,23,24,25],
+  'Uttar Pradesh': [26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50],
+  'Bihar & Jharkhand': [51,52,53,54],
+  'Rajasthan': [55,56,57,58,59,60],
+  'Madhya Pradesh & Chhattisgarh': [61,62,63,64,65,66],
+  'Gujarat': [67,68,69,70,71,72],
+  'Maharashtra': [73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129],
+};
+
+// Assign state to each doctor
+const STATE_CENTERS = {
+  'Jammu, Kashmir & Ladakh': [33.7, 76.5],
+  'Delhi & NCR': [28.61, 77.21],
+  'Punjab, Chandigarh & Himachal': [30.9, 76.5],
+  'Uttarakhand': [30.1, 78.3],
+  'Uttar Pradesh': [26.8, 80.9],
+  'Bihar & Jharkhand': [24.5, 85.3],
+  'Rajasthan': [26.9, 75.8],
+  'Madhya Pradesh & Chhattisgarh': [23.2, 77.4],
+  'Gujarat': [22.3, 72.6],
+  'Maharashtra': [19.1, 75.7],
+};
+
+function getStateForId(id) {
+  for (const [state, ids] of Object.entries(STATE_MAP)) {
+    if (ids.includes(id)) return state;
+  }
+  // fallback: derive from lat/lng
+  return 'Other';
+}
+
+const doctorsWithState = doctors.map(d => ({ ...d, state: getStateForId(d.id) }));
+const ALL_STATES = ['All States', ...Object.keys(STATE_MAP), 'Other'];
 
 // Fix for default Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -77,15 +116,21 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
   const [routeCoords, setRouteCoords] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
   const [routeLoading, setRouteLoading] = useState(false);
+  const [selectedState, setSelectedState] = useState('All States');
 
   const FALLBACK_LOCATION = { lat: 28.6139, lng: 77.2090 };
+
+  const filteredDoctors = useMemo(() => {
+    if (selectedState === 'All States') return doctorsWithState;
+    return doctorsWithState.filter(d => d.state === selectedState);
+  }, [selectedState]);
 
   const processDoctors = (userLoc) => {
     setUserLocation(userLoc);
     setRouteCoords(null);
     setRouteInfo(null);
     
-    let scoredDocs = doctors.map(doc => {
+    let scoredDocs = filteredDoctors.map(doc => {
       const distance = getDistanceInKm(userLoc.lat, userLoc.lng, doc.lat, doc.lng);
       const condMatch = getConditionMatch(requiredDoctorType, doc.conditions);
       
@@ -111,6 +156,10 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
     setNearbyDocs(scoredDocs);
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (userLocation) processDoctors(userLocation);
+  }, [selectedState]);
 
   useEffect(() => {
     async function initLocation() {
@@ -151,31 +200,41 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
   const clearRoute = () => { setRouteCoords(null); setRouteInfo(null); };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden pb-[70px]">
+    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 relative overflow-hidden pb-[70px]">
       {/* Header */}
       <div className="absolute top-0 w-full z-[1000] p-3 pointer-events-none">
-        <div className="bg-white/90 backdrop-blur-xl border border-white shadow-lg px-4 py-2.5 rounded-2xl flex items-center justify-between pointer-events-auto">
+        <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-white/50 dark:border-slate-700 shadow-lg px-4 py-2.5 rounded-2xl flex items-center justify-between gap-3 pointer-events-auto flex-wrap">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="text-slate-600 font-bold px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all active:scale-[0.95]">← Back</button>
+            <button onClick={onBack} className="text-slate-600 dark:text-slate-300 font-bold px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all active:scale-[0.95]">← Back</button>
             <div>
-              <h2 className="font-black text-slate-800 leading-tight text-sm">Nearby Hospitals</h2>
-              <p className="text-[9px] uppercase font-black tracking-widest text-indigo-600">{requiredDoctorType || 'All Facilities'}</p>
+              <h2 className="font-black text-slate-800 dark:text-slate-100 leading-tight text-sm">Nearby Hospitals</h2>
+              <p className="text-[9px] uppercase font-black tracking-widest text-indigo-600 dark:text-indigo-400">{requiredDoctorType || 'All Facilities'}</p>
             </div>
           </div>
+          {/* State dropdown */}
+          <select
+            value={selectedState}
+            onChange={e => setSelectedState(e.target.value)}
+            className="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 outline-none cursor-pointer"
+          >
+            {ALL_STATES.filter(s => s !== 'Other').map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
         </div>
       </div>
 
       {loading && (
-        <div className="flex-1 flex justify-center items-center bg-slate-50">
+        <div className="flex-1 flex justify-center items-center bg-slate-50 dark:bg-slate-900">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-            <p className="text-slate-500 font-bold tracking-widest uppercase text-sm">Locating you...</p>
+            <p className="text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase text-sm">Locating you...</p>
           </div>
         </div>
       )}
 
       {/* Emergency Footer */}
-      <div className="absolute bottom-0 w-full z-[2000] bg-white/95 backdrop-blur-xl border-t border-slate-200 p-2.5 flex gap-2 justify-between shadow-[0_-10px_40px_-5px_rgba(0,0,0,0.1)]">
+      <div className="absolute bottom-0 w-full z-[2000] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-700 p-2.5 flex gap-2 justify-between shadow-[0_-10px_40px_-5px_rgba(0,0,0,0.1)]">
         <a href="tel:112" className="flex-1 bg-red-600 text-white rounded-xl py-2.5 flex items-center justify-center gap-2 font-black text-sm shadow-md active:scale-[0.97] transition-transform">🚨 112</a>
         <a href="tel:108" className="flex-1 bg-orange-500 text-white rounded-xl py-2.5 flex items-center justify-center gap-2 font-black text-sm shadow-md active:scale-[0.97] transition-transform">🚑 108</a>
       </div>
@@ -195,13 +254,14 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
                 <Popup><span className="font-bold">📍 You are here</span><br/><span className="text-xs">Tap anywhere to relocate</span></Popup>
               </Marker>
 
-              {nearbyDocs.map(doc => (
+              {filteredDoctors.map(doc => (
                 <Marker key={doc.id} position={[doc.lat, doc.lng]}>
                   <Popup>
                     <div style={{ minWidth: '140px' }}>
                       <span className="font-bold text-indigo-700">{doc.name}</span><br/>
-                      <span className="text-xs">{doc.distance.toFixed(1)} km • ⭐ {doc.rating}</span><br/>
-                      <span className="text-xs text-slate-500">{doc.specialty}</span>
+                      <span className="text-xs">{getDistanceInKm(userLocation.lat, userLocation.lng, doc.lat, doc.lng).toFixed(1)} km • ⭐ {doc.rating}</span><br/>
+                      <span className="text-xs text-slate-500">{doc.specialty}</span><br/>
+                      {doc.phone && <a href={`tel:${doc.phone.replace(/ /g,'')}`} style={{color:'#4f46e5',fontWeight:'bold',fontSize:'11px'}}>📞 Call</a>}
                     </div>
                   </Popup>
                 </Marker>
@@ -244,19 +304,19 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
           </div>
 
           {/* Hospital Cards */}
-          <div className="flex-1 bg-slate-50 overflow-y-auto px-3 sm:px-5 pt-5 pb-6 -mt-3 relative z-10 rounded-t-3xl border-t border-slate-200/50 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
-            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
-            <h3 className="font-black text-lg text-slate-800 mb-4 ml-1">Top 5 Hospitals for You</h3>
+          <div className="flex-1 bg-slate-50 dark:bg-slate-900 overflow-y-auto px-3 sm:px-5 pt-5 pb-6 -mt-3 relative z-10 rounded-t-3xl border-t border-slate-200/50 dark:border-slate-700/50 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
+            <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-4"></div>
+            <h3 className="font-black text-lg text-slate-800 dark:text-slate-100 mb-4 ml-1">Top 5 Hospitals for You</h3>
             
             {/* Quick Comparison Table */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mb-5 overflow-hidden">
-              <div className="grid grid-cols-[1fr_60px_55px_60px] text-[9px] font-black uppercase tracking-widest text-slate-400 px-4 py-2 border-b border-slate-100 bg-slate-50">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm mb-5 overflow-hidden">
+              <div className="grid grid-cols-[1fr_60px_55px_60px] text-[9px] font-black uppercase tracking-widest text-slate-400 px-4 py-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
                 <span>Hospital</span><span className="text-center">Dist</span><span className="text-center">Rating</span><span className="text-center">Match</span>
               </div>
               {nearbyDocs.map((doc, i) => (
-                <div key={doc.id} className={`grid grid-cols-[1fr_60px_55px_60px] items-center px-4 py-2.5 ${i < nearbyDocs.length - 1 ? 'border-b border-slate-50' : ''} ${i === 0 ? 'bg-indigo-50/50' : ''}`}>
+                <div key={doc.id} className={`grid grid-cols-[1fr_60px_55px_60px] items-center px-4 py-2.5 ${i < nearbyDocs.length - 1 ? 'border-b border-slate-50 dark:border-slate-700/50' : ''} ${i === 0 ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : ''}`}>
                   <div>
-                    <p className="font-bold text-xs text-slate-800 truncate pr-2">{doc.name}</p>
+                    <p className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate pr-2">{doc.name}</p>
                     <p className="text-[9px] text-slate-400">{doc.cost}</p>
                   </div>
                   <p className="text-xs font-black text-center text-slate-700">{doc.distance.toFixed(0)}km</p>
@@ -274,7 +334,7 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
             {/* Detailed Cards */}
             <div className="space-y-4">
               {nearbyDocs.map((doc, index) => (
-                <div key={doc.id} className={`bg-white p-4 rounded-2xl border shadow-md relative overflow-hidden transition-colors ${routeInfo?.name === doc.name ? 'border-indigo-400 ring-2 ring-indigo-100' : 'border-slate-200'}`}>
+                <div key={doc.id} className={`bg-white dark:bg-slate-800 p-4 rounded-2xl border shadow-md relative overflow-hidden transition-colors ${routeInfo?.name === doc.name ? 'border-indigo-400 ring-2 ring-indigo-100 dark:ring-indigo-900' : 'border-slate-200 dark:border-slate-700'}`}>
                   
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1 min-w-0">
@@ -283,8 +343,8 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
                       }`}>
                         {doc.rankBadge}
                       </span>
-                      <h4 className="font-black text-slate-900 text-base leading-tight pr-2">{doc.name}</h4>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-0.5">{doc.specialty}</p>
+                      <h4 className="font-black text-slate-900 dark:text-slate-100 text-base leading-tight pr-2">{doc.name}</h4>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold mt-0.5">{doc.specialty}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       {doc.trustBadge && (
@@ -299,13 +359,13 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
                   <StarRating rating={doc.rating || 3.5} />
 
                   <div className="grid grid-cols-2 gap-2 mt-3">
-                    <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-2.5 border border-slate-100 dark:border-slate-600">
                       <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">Distance</p>
-                      <p className="font-black text-slate-800 text-base">{doc.distance.toFixed(1)} <span className="text-[10px] text-slate-500 font-bold">km</span></p>
+                      <p className="font-black text-slate-800 dark:text-slate-100 text-base">{doc.distance.toFixed(1)} <span className="text-[10px] text-slate-500 font-bold">km</span></p>
                     </div>
-                    <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-2.5 border border-slate-100 dark:border-slate-600">
                       <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">Est. Cost</p>
-                      <p className="font-black text-slate-800 text-base">{doc.cost}</p>
+                      <p className="font-black text-slate-800 dark:text-slate-100 text-base">{doc.cost}</p>
                     </div>
                   </div>
 
@@ -324,33 +384,31 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
                     </div>
                   )}
 
-                  {/* Actions */}
-                  <div className="mt-4 pt-3 border-t border-slate-100">
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => handleNavigate(doc)}
-                        className={`flex-1 py-2 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 ${
-                          routeInfo?.name === doc.name 
-                            ? 'bg-green-600 text-white' 
-                            : 'bg-indigo-600 text-white active:scale-[0.97]'
-                        }`}
-                      >
-                        {routeInfo?.name === doc.name ? '✓ Routed' : '🧭 Navigate'}
-                      </button>
-                      {doc.phone && (
-                        <a href={`tel:${doc.phone.replace(/ /g, '')}`} className="flex-1 bg-white border border-slate-200 text-slate-700 py-2 rounded-xl font-bold text-sm shadow-sm flex items-center justify-center gap-1.5 active:scale-[0.97] transition-transform">
-                          📞 Call
-                        </a>
-                      )}
+                    <div className="mt-3 border-t border-slate-100 dark:border-slate-700 pt-3">
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleNavigate(doc)}
+                          className={`flex-1 py-2 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 ${
+                            routeInfo?.name === doc.name 
+                              ? 'bg-green-600 text-white' 
+                              : 'bg-indigo-600 text-white active:scale-[0.97]'
+                          }`}
+                        >
+                          {routeInfo?.name === doc.name ? '✓ Routed' : '🧭 Navigate'}
+                        </button>
+                        {doc.phone && (
+                          <a href={`tel:${doc.phone.replace(/ /g, '')}`} className="flex-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2 rounded-xl font-bold text-sm shadow-sm flex items-center justify-center gap-1.5 active:scale-[0.97] transition-transform">
+                            📞 Call
+                          </a>
+                        )}
+                      </div>
+                      <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase">Lang:</span>
+                        {doc.languages.map(lang => (
+                          <span key={lang} className="bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded text-[9px] font-bold">{lang}</span>
+                        ))}
+                      </div>
                     </div>
-                    
-                    <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[9px] text-slate-400 font-bold uppercase">Lang:</span>
-                      {doc.languages.map(lang => (
-                        <span key={lang} className="bg-slate-50 border border-slate-100 text-slate-500 px-2 py-0.5 rounded text-[9px] font-bold">{lang}</span>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               ))}
             </div>
