@@ -214,25 +214,46 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 relative overflow-hidden pb-[70px]">
       {/* Header */}
-      <div className="absolute top-0 w-full z-[1000] p-3 pointer-events-none">
-        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/50 dark:border-slate-700 shadow-lg px-4 py-2.5 rounded-2xl flex items-center justify-between pointer-events-auto">
-          <div className="flex items-center gap-3">
-            <button onClick={onBack} className="text-slate-600 dark:text-slate-300 font-bold px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all active:scale-[0.95]">← Back</button>
-            <div>
-              <h2 className="font-black text-slate-800 dark:text-slate-100 leading-tight text-sm">Nearby Hospitals</h2>
-              <p className="text-[9px] uppercase font-black tracking-widest text-indigo-600">{requiredDoctorType || 'All Facilities'}</p>
+      <div className="absolute top-0 w-full z-[1000] px-3 pt-3 pointer-events-none">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 shadow-xl rounded-2xl pointer-events-auto overflow-hidden">
+          {/* Top row */}
+          <div className="flex items-center gap-3 px-4 py-3">
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 font-semibold text-sm transition-colors shrink-0"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+              Back
+            </button>
+            <div className="w-px h-5 bg-slate-200 dark:bg-slate-700" />
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-sm text-slate-800 dark:text-slate-100 leading-none">Nearby Hospitals</p>
+                {requiredDoctorType && (
+                  <p className="text-[10px] text-indigo-500 dark:text-indigo-400 font-semibold mt-0.5 truncate">{requiredDoctorType}</p>
+                )}
+              </div>
             </div>
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 shrink-0">
+              {filteredDoctors.length} facilities
+            </span>
           </div>
-          {/* State dropdown */}
-          <select
-            value={selectedState}
-            onChange={e => setSelectedState(e.target.value)}
-            className="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 outline-none cursor-pointer"
-          >
-            {ALL_STATES.filter(s => s !== 'Other').map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
+          {/* State filter row */}
+          <div className="px-4 pb-3 flex items-center gap-2">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 shrink-0"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <select
+              value={selectedState}
+              onChange={e => setSelectedState(e.target.value)}
+              className="flex-1 text-xs font-semibold bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 outline-none cursor-pointer focus:ring-2 focus:ring-indigo-500/30"
+            >
+              {ALL_STATES.filter(s => s !== 'Other').map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -254,7 +275,7 @@ export default function MapScreen({ onBack, requiredDoctorType }) {
       {!loading && (
         <div className="flex-1 flex flex-col relative h-full">
           {/* Map */}
-          <div className={`w-full relative z-0 shadow-inner shrink-0 transition-all duration-300 ${mapExpanded ? 'h-[calc(100vh-140px)]' : 'h-[35vh] sm:h-[40vh]'}`}>
+          <div className={`w-full relative z-0 shadow-inner shrink-0 transition-all duration-300 ${mapExpanded ? 'h-[calc(100vh-140px)]' : 'h-[35vh] sm:h-[40vh]'}`} style={{ marginTop: '110px' }}>
             <MapContainer center={[userLocation.lat, userLocation.lng]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
               <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <StateZoomer selectedState={selectedState} />
