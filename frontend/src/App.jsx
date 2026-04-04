@@ -410,9 +410,14 @@ export default function App() {
       <header className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white flex items-center shrink-0 px-4 md:px-8 z-50 sticky top-0 border-b border-slate-200 dark:border-slate-700/50 shadow-sm">
         <button 
           onClick={() => { setScreen('dashboard'); setAnalysis(null); }}
-          className="text-teal-600 dark:text-teal-400 font-black text-lg tracking-tight mr-6 py-4 hover:text-teal-500 dark:hover:text-teal-300 transition-colors flex items-center gap-2"
+          className="mr-6 py-3 md:py-4 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center"
         >
-          🩺 HealBuddy
+          <img 
+            src="/logo.png" 
+            alt="HealBuddy" 
+            className="h-10 md:h-14 w-auto object-contain" 
+            onError={(e) => { e.target.style.display = 'none'; e.target.after("🩺 HealBuddy"); }}
+          />
         </button>
         
         <nav className="hidden sm:flex items-center gap-0 flex-1 h-full">
