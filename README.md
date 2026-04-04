@@ -195,8 +195,15 @@ Features: live search with keyword highlighting, category tabs, language selecto
 ## How to Run Locally
 
 ```bash
-cd frontend
-npm install
+# 1. Clone the repository
+git clone https://github.com/Coffee-0verflow/HealBuddy.git
+
+cd HealBuddy/frontend
+
+# 2. Install dependencies
+npm install --legacy-peer-deps
+
+# 3. Run locally
 npm run dev
 ```
 
