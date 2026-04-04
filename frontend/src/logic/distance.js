@@ -17,23 +17,31 @@ export function getDistanceInKm(lat1, lon1, lat2, lon2) {
 }
 
 // Wrapping Geolocation API in a Promise
+// Tries high accuracy first, falls back to low accuracy on timeout/unavailable
 export function getCurrentLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error("Geolocation is not supported by your browser"));
-    } else {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => {
-          reject(error);
-        },
-        { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
-      );
+      reject(new Error('UNSUPPORTED'));
+      return;
     }
+
+    const tryGet = (highAccuracy, timeoutMs) =>
+      new Promise((res, rej) =>
+        navigator.geolocation.getCurrentPosition(res, rej, {
+          enableHighAccuracy: highAccuracy,
+          timeout: timeoutMs,
+          maximumAge: 0,          // never use stale cache for SOS
+        })
+      );
+
+    // First attempt: high accuracy (GPS), 10s
+    tryGet(true, 10000)
+      .then(pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }))
+      .catch(() => {
+        // Second attempt: network/wifi location, 10s
+        tryGet(false, 10000)
+          .then(pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }))
+          .catch(err => reject(err));
+      });
   });
 }
