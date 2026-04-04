@@ -6,6 +6,7 @@ import MapScreen from './components/MapScreen';
 import FirstAid from './components/FirstAid';
 import LanguageScreen from './components/LanguageScreen';
 import InstallPrompt from './components/InstallPrompt';
+import SOSButton from './components/SOSButton';
 
 const SYMPTOM_ICONS = {
   "Fever": "🌡️",
@@ -110,6 +111,9 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
               <a href="tel:108" className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 transition-colors active:scale-[0.97]">
                 🚑 Call 108
               </a>
+            </div>
+            <div className="mt-4">
+              <SOSButton />
             </div>
           </div>
 

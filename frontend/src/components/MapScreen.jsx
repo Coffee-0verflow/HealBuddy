@@ -4,6 +4,7 @@ import L from 'leaflet';
 import { doctors } from '../data/doctors';
 import { pharmacies } from '../data/pharmacies';
 import { getCurrentLocation, getDistanceInKm } from '../logic/distance';
+import SOSButton from './SOSButton';
 
 // State mapping by ID range
 const STATE_MAP = {
@@ -304,6 +305,7 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
       {/* Emergency Footer */}
       <div className="absolute bottom-0 w-full z-[2000] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-700 p-2.5 flex gap-2 justify-between shadow-[0_-10px_40px_-5px_rgba(0,0,0,0.1)]">
         <a href="tel:112" className="flex-1 bg-red-600 text-white rounded-xl py-2.5 flex items-center justify-center gap-2 font-black text-sm shadow-md active:scale-[0.97] transition-transform">🚨 112</a>
+        <SOSButton compact />
         <a href="tel:108" className="flex-1 bg-orange-500 text-white rounded-xl py-2.5 flex items-center justify-center gap-2 font-black text-sm shadow-md active:scale-[0.97] transition-transform">🚑 108</a>
       </div>
 

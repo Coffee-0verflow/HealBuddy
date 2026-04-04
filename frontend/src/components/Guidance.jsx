@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PharmacyMode from './PharmacyMode';
+import SOSButton from './SOSButton';
 import { getCurrentLocation } from '../logic/distance';
 
 export default function Guidance({ analysis, onFindDoctors, onReset }) {
@@ -82,6 +83,9 @@ export default function Guidance({ analysis, onFindDoctors, onReset }) {
           🚑 Call 108
         </a>
       </div>
+
+      {/* SOS Share Location */}
+      <SOSButton />
 
       {/* PHARMACY MODE — shown for low urgency, no red flags */}
       {showPharmacy && (
