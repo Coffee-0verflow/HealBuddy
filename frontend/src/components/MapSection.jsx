@@ -94,7 +94,7 @@ export default function MapSection({
   if (!userLocation) return null;
 
   return (
-    <div className="w-full h-full relative z-0 bg-slate-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.3)] border border-slate-700/50">
+    <div className="w-full h-full relative z-0 bg-slate-200 dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm dark:shadow-[0_0_40px_rgba(0,0,0,0.3)] border border-slate-300 dark:border-slate-700/50">
       <MapContainer 
         center={[userLocation.lat, userLocation.lng]} 
         zoom={12} 
