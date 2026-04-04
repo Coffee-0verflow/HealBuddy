@@ -425,9 +425,9 @@ export default function App() {
             { id: 'dashboard', label: 'Home',       action: () => { setScreen('dashboard'); setAnalysis(null); } },
             { id: 'guidance',  label: 'Guidance',    action: () => setScreen('pick') },
             { id: 'firstaid',  label: 'First Aid',   action: () => setScreen('firstaid') },
-            { id: 'language',  label: '🗣️ Phrases',   action: () => setScreen('language') },
+            { id: 'language',  label: 'Phrases',   action: () => setScreen('language') },
             { id: 'hospitals', label: 'Hospitals',   action: () => setScreen('map') },
-            { id: 'pharmacy',  label: '💊 Pharmacy',   action: () => setScreen('pharmacy') },
+            { id: 'pharmacy',  label: 'Pharmacy',   action: () => setScreen('pharmacy') },
           ].map(item => (
             <button
               key={item.id}
