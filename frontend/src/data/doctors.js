@@ -176,4 +176,11 @@ export const doctors = [
 
   // ===== PUDUCHERRY =====
   { id:129, name:"JIPMER Puducherry", specialty:"Emergency Care", lat:11.960, lng:79.849, cost:"₹0-50", languages:["Tamil","English","Telugu"], trustBadge:true, phone:"+91 413 2272380", rating:4.5, conditions:["chest pain","breathing","fracture","burns","bleeding","injury","fever","allergy"] },
+
+  // ===== GWALIOR Additions =====
+  { id:130, name:"BIMR Hospitals Gwalior", specialty:"Multi-Specialty", lat:26.242, lng:78.204, cost:"₹1000-3000", languages:["Hindi","English"], trustBadge:true, phone:"+91 751 2432400", rating:4.4, conditions:["chest pain","breathing","fracture","allergy"] },
+  { id:131, name:"Sahara Hospital Gwalior", specialty:"General Hospital", lat:26.208, lng:78.169, cost:"₹500-1500", languages:["Hindi","English"], trustBadge:true, phone:"+91 751 2445500", rating:4.1, conditions:["fever","injury","fracture","vomiting"] },
+  { id:132, name:"Kalyan Memorial Gwalior", specialty:"Specialist", lat:26.220, lng:78.175, cost:"₹800-2000", languages:["Hindi"], trustBadge:true, phone:"+91 751 2341234", rating:4.3, conditions:["chest pain","burns","allergy","fracture"] },
+  { id:133, name:"Apollo Spectra Gwalior", specialty:"Emergency Care", lat:26.210, lng:78.188, cost:"₹1500-3500", languages:["Hindi","English"], trustBadge:true, phone:"+91 751 4001111", rating:4.5, conditions:["injury","fracture","bleeding","fever","burns"] },
+  { id:134, name:"District Hospital Morar", specialty:"General Hospital", lat:26.230, lng:78.225, cost:"₹0-50", languages:["Hindi"], trustBadge:false, phone:"+91 751 2368222", rating:3.2, conditions:["fever","pain","dizziness","injury"] },
 ];

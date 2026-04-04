@@ -142,4 +142,10 @@ export const pharmacies = [
   { id:'ph98', name:'Apollo Pharmacy Chandigarh Sector 22',lat:30.7333, lng:76.7794, open24x7:true, rating:4.4, state:'Punjab, Chandigarh & Himachal', phone:'+91 172 2741234' },
   { id:'ph99', name:'MedPlus Bengaluru Malleshwaram',    lat:13.0035, lng:77.5710, open24x7:false, rating:4.1, state:'Karnataka',                     phone:'+91 80 23561234' },
   { id:'ph100',name:'Apollo Pharmacy Hyderabad Ameerpet',lat:17.4374, lng:78.4487, open24x7:true,  rating:4.3, state:'Telangana & Andhra Pradesh',    phone:'+91 40 23741234' },
+
+  // GWALIOR additions
+  { id:'ph101', name:'Apollo Pharmacy Gwalior City Centre', lat:26.212, lng:78.185, open24x7:true, rating:4.3, state:'Madhya Pradesh & Chhattisgarh', phone:'+91 751 2451234' },
+  { id:'ph102', name:'MedPlus Gwalior Morar', lat:26.225, lng:78.220, open24x7:false, rating:4.0, state:'Madhya Pradesh & Chhattisgarh', phone:'+91 751 2361234' },
+  { id:'ph103', name:'Wellness Pharmacy Lashkar', lat:26.198, lng:78.161, open24x7:false, rating:3.9, state:'Madhya Pradesh & Chhattisgarh', phone:'+91 751 2321234' },
+  { id:'ph104', name:'Jan Aushadhi Gwalior', lat:26.205, lng:78.170, open24x7:false, rating:3.8, state:'Madhya Pradesh & Chhattisgarh', phone:'+91 751 2401235' },
 ];
