@@ -91,19 +91,7 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
         <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100 text-center mb-5">
           How are you <em className="text-teal-600 not-italic font-black italic">feeling</em> today?
         </h2>
-        <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🔍</span>
-          <input 
-            type="text" 
-            placeholder="Enter your symptom (fever, chest pain, injury...)"
-            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent shadow-sm"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && e.target.value.trim()) {
-                onQuickSymptom(e.target.value.trim());
-              }
-            }}
-          />
-        </div>
+        <SymptomSearch onQuickSymptom={onQuickSymptom} />
       </section>
 
       {/* Feature Cards Grid */}
@@ -210,6 +198,123 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
   );
 }
 
+// Exhaustive keyword → symptom ID map
+const SYMPTOM_KEYWORDS = {
+  fever:       ['fever','temperature','hot','burning up','chills','sweating','sweats','pyrexia','febrile','high temp','body heat','feverish'],
+  stomach:     ['stomach','nausea','vomit','vomiting','diarrhea','diarrhoea','loose motion','loose stool','abdominal','abdomen','belly','gut','indigestion','food poison','food poisoning','gastro','cramps','bloat','bloating','acidity','acid reflux','heartburn','ulcer','constipation','bowel'],
+  injury:      ['injury','wound','cut','bleed','bleeding','bruise','fracture','broken bone','sprain','burn','burns','scald','bite','animal bite','dog bite','snake bite','laceration','trauma','accident','fall','hit','hurt','pain in leg','pain in arm','swollen','swelling'],
+  breathing:   ['breath','breathing','breathless','shortness of breath','short of breath','can\'t breathe','cannot breathe','wheeze','wheezing','asthma','inhaler','suffocate','suffocation','choking','choke','respiratory','lung','lungs','cough','coughing','pneumonia','bronchitis','oxygen'],
+  chest_pain:  ['chest','chest pain','heart','heart attack','cardiac','palpitation','palpitations','tight chest','pressure in chest','angina','left arm pain','jaw pain','heart burn'],
+  dehydration: ['dehydrat','thirst','thirsty','dry mouth','dizzy','dizziness','lightheaded','light headed','faint','fainting','weak','weakness','fatigue','tired','exhausted','no energy','lethargic','lethargy','headache','head ache','migraine','head pain','sunstroke','heat stroke','heat exhaustion'],
+  allergy:     ['allerg','allergic','rash','hives','itch','itching','itchy','swollen face','swollen lips','anaphylaxis','anaphylactic','reaction','skin reaction','sting','bee sting','wasp','sneezing','runny nose','hay fever','urticaria'],
+  womens_health: ['period','periods','menstrual','menstruation','cramp','cramps','pregnancy','pregnant','miscarriage','vaginal','discharge','breast','ovary','ovarian','pcos','endometriosis','uti','urinary tract','pelvic','pelvic pain','labour','labor','contractions'],
+  child_health:  ['child','children','baby','infant','toddler','kid','kids','newborn','pediatric','paediatric','vaccination','vaccine','growth','teething','diaper','nappy','colic','jaundice in baby','febrile seizure'],
+  senior_emergency: ['senior','elderly','old age','aged','grandparent','stroke','paralysis','memory loss','dementia','alzheimer','fall elderly','hip fracture','confusion','disoriented','unconscious','unresponsive','seizure','epilepsy'],
+};
+
+function matchSymptom(text) {
+  const lower = text.toLowerCase().trim();
+  if (!lower) return null;
+  // Score each symptom by how many keywords match
+  let best = null, bestScore = 0;
+  for (const [id, keywords] of Object.entries(SYMPTOM_KEYWORDS)) {
+    let score = 0;
+    for (const kw of keywords) {
+      if (lower === kw) { score += 10; break; }         // exact match
+      if (lower.startsWith(kw) || kw.startsWith(lower)) score += 5;
+      if (lower.includes(kw) || kw.includes(lower)) score += 2;
+    }
+    if (score > bestScore) { bestScore = score; best = id; }
+  }
+  return bestScore >= 2 ? best : null; // null = no confident match
+}
+
+function SymptomSearch({ onQuickSymptom }) {
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [noMatch, setNoMatch] = useState(false);
+
+  const getSuggestions = (text) => {
+    const lower = text.toLowerCase().trim();
+    if (!lower) return [];
+    return ALL_SYMPTOMS.filter(s =>
+      SYMPTOM_KEYWORDS[s.id].some(kw => kw.includes(lower) || lower.includes(kw))
+    ).slice(0, 5);
+  };
+
+  const handleChange = (e) => {
+    const val = e.target.value;
+    setQuery(val);
+    setNoMatch(false);
+    setSuggestions(val.trim() ? getSuggestions(val) : []);
+  };
+
+  const handleSubmit = () => {
+    const matched = matchSymptom(query);
+    if (matched) {
+      setSuggestions([]);
+      setNoMatch(false);
+      onQuickSymptom(matched);
+    } else {
+      setNoMatch(true);
+    }
+  };
+
+  const handlePick = (id) => {
+    setQuery('');
+    setSuggestions([]);
+    setNoMatch(false);
+    onQuickSymptom(id);
+  };
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🔍</span>
+        <input
+          type="text"
+          value={query}
+          onChange={handleChange}
+          onKeyDown={(e) => { if (e.key === 'Enter' && query.trim()) handleSubmit(); }}
+          placeholder="Describe your symptom (e.g. headache, vomiting, chest pain...)"
+          className="w-full pl-12 pr-24 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent shadow-sm"
+        />
+        {query.trim() && (
+          <button
+            onClick={handleSubmit}
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-colors"
+          >
+            Search
+          </button>
+        )}
+      </div>
+
+      {/* Live suggestions */}
+      {suggestions.length > 0 && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-50 overflow-hidden">
+          {suggestions.map(s => (
+            <button
+              key={s.id}
+              onClick={() => handlePick(s.id)}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-left transition-colors border-b border-slate-50 dark:border-slate-700/50 last:border-0"
+            >
+              <span className="text-xl">{s.icon}</span>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{s.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* No match feedback */}
+      {noMatch && (
+        <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-semibold">
+          ⚠️ Couldn't identify that symptom. Please pick from the categories below.
+        </div>
+      )}
+    </div>
+  );
+}
+
 const ALL_SYMPTOMS = [
   { id: 'fever',          label: 'Fever',                   icon: '🌡️', color: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800/50 text-orange-700 dark:text-orange-400' },
   { id: 'stomach',        label: 'Stomach Issue',           icon: '🤢', color: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800/50 text-yellow-700 dark:text-yellow-400' },
@@ -262,22 +367,22 @@ export default function App() {
     setScreen('guidance');
   };
 
-  const handleQuickSymptom = (symptomText) => {
-    const lower = symptomText.toLowerCase();
-    const match = ALL_SYMPTOMS.find(s =>
-      lower.includes(s.label.toLowerCase()) ||
-      lower.includes(s.id.replace('_', ' '))
-    );
-    const id = match?.id ||
-      (lower.includes('chest') ? 'chest_pain' :
-       lower.includes('breath') ? 'breathing' :
-       lower.includes('stomach') || lower.includes('vomit') || lower.includes('poison') ? 'stomach' :
-       lower.includes('injur') || lower.includes('bleed') || lower.includes('burn') || lower.includes('fracture') || lower.includes('wound') ? 'injury' :
-       lower.includes('allerg') ? 'allergy' :
-       lower.includes('dizz') || lower.includes('dehydr') ? 'dehydration' :
-       'fever');
-    setSymptomId(id);
-    setScreen('input');
+  const handleQuickSymptom = (input) => {
+    // Accept direct symptom ID (from SymptomSearch/picker) or free text
+    const isDirectId = ALL_SYMPTOMS.some(s => s.id === input);
+    if (isDirectId) {
+      setSymptomId(input);
+      setScreen('input');
+      return;
+    }
+    const matched = matchSymptom(input);
+    if (matched) {
+      setSymptomId(matched);
+      setScreen('input');
+    } else {
+      // No confident match — send to picker so user can choose
+      setScreen('pick');
+    }
   };
 
   const activeTab = screen === 'dashboard' ? 'dashboard' : screen === 'map' ? 'hospitals' : screen === 'pharmacy' ? 'pharmacy' : screen === 'firstaid' ? 'firstaid' : screen === 'language' ? 'language' : 'guidance';
