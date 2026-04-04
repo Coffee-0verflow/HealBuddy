@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { doctors } from '../data/doctors';
 import { pharmacies } from '../data/pharmacies';
 import { getCurrentLocation, getDistanceInKm } from '../logic/distance';
-import { offlineRoute } from '../logic/offlineRouter';
+import { offlineRoute, getBearing } from '../logic/offlineRouter';
+import LiveCompass from './LiveCompass';
 
 import MapSection from './MapSection';
 import HospitalList from './HospitalList';
@@ -160,7 +161,9 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
         const route = data.routes[0];
         const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
         setRouteCoords(coords);
-        setRouteInfo({ name: doc.name, distance: (route.distance / 1000).toFixed(1), duration: String(Math.ceil(route.duration / 60)), offline: false });
+        // Compute bearing for compass even on online routes
+        const bearingDeg = Math.round(getBearing(userLocation.lat, userLocation.lng, doc.lat, doc.lng));
+        setRouteInfo({ name: doc.name, distance: (route.distance / 1000).toFixed(1), duration: String(Math.ceil(route.duration / 60)), offline: false, bearingDeg });
         setRouteSteps(null);
       } else throw new Error('No route');
     } catch {
@@ -293,33 +296,54 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
         {/* Right Side: Scrollable List */}
         <div className="w-full md:w-1/2 lg:w-[55%] h-[50vh] md:h-full p-4 md:p-8 lg:px-12 bg-slate-50 dark:bg-slate-950 pb-24 overflow-y-auto shrink-0 md:shrink">
 
-          {/* Offline step-by-step directions panel */}
+          {/* Live Compass — shown whenever a route is active (online or offline) */}
+          {routeInfo && !routeSteps && (
+            <div className="mb-6">
+              <LiveCompass
+                targetBearingDeg={routeInfo.bearingDeg ?? 0}
+                destName={routeInfo.name}
+                distanceKm={routeInfo.distance}
+              />
+            </div>
+          )}
+
+          {/* Offline step-by-step directions + Live Compass */}
           {routeSteps && routeInfo?.offline && (
-            <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-2xl overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-3 bg-amber-100 dark:bg-amber-900/40 border-b border-amber-200 dark:border-amber-700/50">
-                <span className="text-lg">🧭</span>
-                <div className="flex-1">
-                  <p className="font-black text-sm text-amber-900 dark:text-amber-200">Offline Directions</p>
-                  <p className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">Compass-based — works without internet or downloaded maps</p>
-                </div>
-                <div className="text-center shrink-0">
-                  <p className="font-black text-lg text-amber-800 dark:text-amber-300">{routeInfo.distance} km</p>
-                  <p className="text-[9px] text-amber-600 dark:text-amber-500 font-bold">~{routeInfo.duration} min</p>
-                </div>
-              </div>
-              <div className="px-4 py-3 space-y-2">
-                {routeSteps.map((step, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className="flex flex-col items-center shrink-0">
-                      <span className="text-base">{step.icon}</span>
-                      {i < routeSteps.length - 1 && <div className="w-px h-4 bg-amber-200 dark:bg-amber-700 mt-1" />}
-                    </div>
-                    <p className="text-xs font-semibold text-amber-900 dark:text-amber-200 pt-0.5 leading-relaxed">{step.text}</p>
+            <div className="mb-6 space-y-3">
+              {/* Live Compass */}
+              <LiveCompass
+                targetBearingDeg={routeInfo.bearingDeg}
+                destName={routeInfo.name}
+                distanceKm={routeInfo.distance}
+              />
+
+              {/* Step-by-step text directions */}
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-2xl overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 bg-amber-100 dark:bg-amber-900/40 border-b border-amber-200 dark:border-amber-700/50">
+                  <span className="text-lg">🧭</span>
+                  <div className="flex-1">
+                    <p className="font-black text-sm text-amber-900 dark:text-amber-200">Step-by-Step Directions</p>
+                    <p className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">Works without internet or downloaded maps</p>
                   </div>
-                ))}
-              </div>
-              <div className="px-4 py-2 border-t border-amber-200 dark:border-amber-700/50">
-                <p className="text-[10px] text-amber-600 dark:text-amber-500 font-medium">⚠️ Directions are approximate. Follow road signs and use your best judgment.</p>
+                  <div className="text-center shrink-0">
+                    <p className="font-black text-lg text-amber-800 dark:text-amber-300">{routeInfo.distance} km</p>
+                    <p className="text-[9px] text-amber-600 dark:text-amber-500 font-bold">~{routeInfo.duration} min</p>
+                  </div>
+                </div>
+                <div className="px-4 py-3 space-y-2">
+                  {routeSteps.map((step, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div className="flex flex-col items-center shrink-0">
+                        <span className="text-base">{step.icon}</span>
+                        {i < routeSteps.length - 1 && <div className="w-px h-4 bg-amber-200 dark:bg-amber-700 mt-1" />}
+                      </div>
+                      <p className="text-xs font-semibold text-amber-900 dark:text-amber-200 pt-0.5 leading-relaxed">{step.text}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-4 py-2 border-t border-amber-200 dark:border-amber-700/50">
+                  <p className="text-[10px] text-amber-600 dark:text-amber-500 font-medium">⚠️ Directions are approximate. Follow road signs and use your best judgment.</p>
+                </div>
               </div>
             </div>
           )}

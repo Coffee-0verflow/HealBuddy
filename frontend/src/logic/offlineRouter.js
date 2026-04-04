@@ -55,6 +55,10 @@ function interpolate(lat1, lng1, lat2, lng2, steps = 8) {
  *   bearing     — initial compass bearing degrees
  *   compassDir  — e.g. "North-East"
  */
+export function getBearing(lat1, lng1, lat2, lng2) {
+  return bearing(lat1, lng1, lat2, lng2);
+}
+
 export function offlineRoute(userLat, userLng, destLat, destLng, destName) {
   const distKm = haversine(userLat, userLng, destLat, destLng);
   const initialBearing = bearing(userLat, userLng, destLat, destLng);
