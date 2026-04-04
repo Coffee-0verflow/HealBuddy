@@ -197,7 +197,7 @@ function Dashboard({ onNavigate, onQuickSymptom }) {
           <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
             <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-xl flex items-center justify-center text-lg mb-3">🗣️</div>
             <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 mb-1">Offline Translation</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">50+ medical phrases translated to 8 Indian languages instantly.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">50+ medical phrases translated to 10 Indian languages instantly.</p>
           </div>
           <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800/50 rounded-2xl p-6">
             <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/40 rounded-xl flex items-center justify-center text-lg mb-3">📋</div>
