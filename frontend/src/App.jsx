@@ -441,7 +441,7 @@ export default function App() {
         <div className="ml-auto flex items-center gap-2">
           <button
             onClick={() => setDark(d => !d)}
-            className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white p-2 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+            className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white p-2 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 mr-1 sm:mr-3"
           >
             {dark ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -457,8 +457,27 @@ export default function App() {
               </svg>
             )}
           </button>
-          <a href="tel:112" className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors active:scale-[0.95] flex items-center gap-1.5">
-            🚨 Emergency
+
+          {/* Compact 108 & 112 Call buttons */}
+          <div className="flex gap-1.5 sm:gap-2 mr-1 sm:mr-3">
+            <a 
+              href="tel:108" 
+              className="bg-gradient-to-br from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white px-2.5 py-1.5 rounded-lg text-[10px] md:text-xs font-black transition-all shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_20px_rgba(249,115,22,0.6)] hover:scale-105 active:scale-95 flex items-center gap-1 border border-orange-400/30"
+            >
+              🚑 <span className="hidden sm:inline">108</span>
+            </a>
+            <a 
+              href="tel:112" 
+              className="bg-gradient-to-br from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-2.5 py-1.5 rounded-lg text-[10px] md:text-xs font-black transition-all shadow-[0_0_15px_rgba(220,38,38,0.4)] hover:shadow-[0_0_20px_rgba(220,38,38,0.6)] hover:scale-105 active:scale-95 flex items-center gap-1 border border-red-500/50"
+            >
+              🚨 <span className="hidden sm:inline">112</span>
+            </a>
+          </div>
+
+          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mr-2 hidden md:block"></div>
+
+          <a href="tel:112" className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all shadow-md hover:shadow-[0_0_15px_rgba(220,38,38,0.5)] active:scale-[0.95] flex items-center gap-1.5">
+            🚨 <span className="hidden sm:inline">Emergency</span>
           </a>
         </div>
       </header>
