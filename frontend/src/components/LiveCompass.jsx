@@ -1,236 +1,214 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
-function getLabel(a) {
-  a = ((a % 360) + 360) % 360;
-  if (a < 22.5 || a >= 337.5) return '↑ Straight Ahead';
-  if (a < 67.5)  return '↗ Slight Right';
-  if (a < 112.5) return '→ Turn Right';
-  if (a < 157.5) return '↘ Sharp Right';
-  if (a < 202.5) return '↓ Turn Around';
-  if (a < 247.5) return '↙ Sharp Left';
-  if (a < 292.5) return '← Turn Left';
-  return           '↖ Slight Left';
-}
-
-async function askPermission() {
+async function requestOrientationPermission() {
   if (typeof DeviceOrientationEvent !== 'undefined' &&
       typeof DeviceOrientationEvent.requestPermission === 'function') {
     try {
-      const r = await DeviceOrientationEvent.requestPermission();
-      return r === 'granted';
+      const result = await DeviceOrientationEvent.requestPermission();
+      return result === 'granted';
     } catch { return false; }
   }
   return true;
 }
 
+function getArrowLabel(angleDiff) {
+  const a = ((angleDiff % 360) + 360) % 360;
+  if (a < 22.5 || a >= 337.5) return { label: 'Straight Ahead', arrow: '↑' };
+  if (a < 67.5)  return { label: 'Slight Right',  arrow: '↗' };
+  if (a < 112.5) return { label: 'Turn Right',     arrow: '→' };
+  if (a < 157.5) return { label: 'Sharp Right',    arrow: '↘' };
+  if (a < 202.5) return { label: 'Turn Around',    arrow: '↓' };
+  if (a < 247.5) return { label: 'Sharp Left',     arrow: '↙' };
+  if (a < 292.5) return { label: 'Turn Left',      arrow: '←' };
+  return           { label: 'Slight Left',   arrow: '↖' };
+}
+
+// ── Compass Rose (the original working dial) ──────────────────────────────────
+function CompassRose({ smoothHeading, needleAngle, size = 208 }) {
+  const half = size / 2;
+  const ringR = half - 4;
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      {/* Outer ring */}
+      <div className="absolute inset-0 rounded-full border-4 border-slate-600 bg-slate-800"
+        style={{ boxShadow: 'inset 0 0 30px rgba(0,0,0,0.5), 0 0 20px rgba(99,102,241,0.15)' }} />
+
+      {/* Cardinal labels — rotate with heading */}
+      {[
+        { label: 'N', angle: 0,   color: '#f87171' },
+        { label: 'E', angle: 90,  color: '#cbd5e1' },
+        { label: 'S', angle: 180, color: '#cbd5e1' },
+        { label: 'W', angle: 270, color: '#cbd5e1' },
+      ].map(({ label: l, angle, color }) => {
+        const rad = (angle - (smoothHeading ?? 0)) * Math.PI / 180;
+        const r = ringR * 0.82;
+        const x = half + r * Math.sin(rad);
+        const y = half - r * Math.cos(rad);
+        return (
+          <span key={l} className="absolute font-black select-none"
+            style={{ left: x, top: y, transform: 'translate(-50%,-50%)',
+              color, fontSize: size > 250 ? 15 : 12 }}>
+            {l}
+          </span>
+        );
+      })}
+
+      {/* Tick marks — rotate with heading */}
+      {Array.from({ length: 36 }).map((_, i) => {
+        const angle = i * 10;
+        const rad = (angle - (smoothHeading ?? 0)) * Math.PI / 180;
+        const isMajor = i % 9 === 0;
+        const r1 = isMajor ? ringR * 0.70 : ringR * 0.75;
+        const r2 = ringR * 0.82;
+        const x1 = half + r1 * Math.sin(rad), y1 = half - r1 * Math.cos(rad);
+        const x2 = half + r2 * Math.sin(rad), y2 = half - r2 * Math.cos(rad);
+        return (
+          <svg key={i} className="absolute inset-0 overflow-visible pointer-events-none"
+            style={{ width: size, height: size }}>
+            <line x1={x1} y1={y1} x2={x2} y2={y2}
+              stroke={isMajor ? '#6366f1' : '#334155'}
+              strokeWidth={isMajor ? 2 : 1} />
+          </svg>
+        );
+      })}
+
+      {/* Needle — points to destination */}
+      <div className="absolute inset-0 flex items-center justify-center"
+        style={{ transform: `rotate(${needleAngle}deg)`, transition: 'transform 0.3s ease-out' }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute">
+          <polygon points={`${half},${size*0.10} ${half+size*0.05},${half} ${half},${half*0.88} ${half-size*0.05},${half}`}
+            fill="#ef4444" opacity="0.95" />
+          <polygon points={`${half},${size*0.90} ${half+size*0.05},${half} ${half},${half*1.12} ${half-size*0.05},${half}`}
+            fill="#475569" opacity="0.7" />
+        </svg>
+      </div>
+
+      {/* Center dot */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-4 h-4 rounded-full bg-white border-2 border-slate-600 shadow-lg z-10" />
+      </div>
+
+      {/* Heading degrees */}
+      {smoothHeading != null && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-slate-900/80 px-2 py-0.5 rounded-full">
+          <p className="text-[10px] font-black text-slate-300">{Math.round(smoothHeading)}°</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function LiveCompass({ targetBearingDeg, destName, distanceKm }) {
-  const [expanded, setExpanded] = useState(false);
-  const [heading,  setHeading]  = useState(null);
-  const [error,    setError]    = useState(null);
-  const [needPerm, setNeedPerm] = useState(false);
-  const [stable,   setStable]   = useState(false);
+  const [expanded,      setExpanded]      = useState(false);
+  const [permitted,     setPermitted]     = useState(false);
+  const [smoothHeading, setSmoothHeading] = useState(null);
+  const [error,         setError]         = useState(null);
 
-  // All smoothing in refs — no stale closures, no extra renders
-  const sinS   = useRef(0);
-  const cosS   = useRef(0);
-  const buf    = useRef([]);
-  const active = useRef(false);
-  const rafId  = useRef(null);
-  const latest = useRef(null); // smoothed heading, read by RAF
+  const handleOrientation = useCallback((e) => {
+    // iOS: webkitCompassHeading is true-north magnetic
+    // Android: 360 - alpha
+    let h = e.webkitCompassHeading != null
+      ? e.webkitCompassHeading
+      : e.alpha != null ? (360 - e.alpha) : null;
 
-  // DOM refs for zero-overhead rotation
-  const dialEl   = useRef(null);
-  const needleEl = useRef(null);
-  const prevDial = useRef(0);
-  const prevNeedle = useRef(0);
+    if (h == null) { setError('Compass sensor not available on this device.'); return; }
 
-  const onEvent = useRef((e) => {
-    let raw = null;
+    h = ((h % 360) + 360) % 360;
 
-    // iOS — best source, already true-north
-    if (e.webkitCompassHeading != null && e.webkitCompassHeading >= 0) {
-      raw = e.webkitCompassHeading;
-    }
-    // Android absolute
-    else if (e.absolute && e.alpha != null) {
-      raw = (360 - e.alpha + 360) % 360;
-    }
-    // Android relative fallback
-    else if (e.alpha != null) {
-      raw = (360 - e.alpha + 360) % 360;
-    }
+    setSmoothHeading(prev => {
+      if (prev == null) return h;
+      let diff = h - prev;
+      if (diff > 180)  diff -= 360;
+      if (diff < -180) diff += 360;
+      return ((prev + diff * 0.2) + 360) % 360;
+    });
+  }, []);
 
-    if (raw == null) return;
-    raw = ((raw % 360) + 360) % 360;
-
-    // Vector smoothing — immune to 0/360 wrap
-    const ALPHA = 0.15; // higher = more responsive, lower = smoother
-    const rad = raw * Math.PI / 180;
-    sinS.current = (1 - ALPHA) * sinS.current + ALPHA * Math.sin(rad);
-    cosS.current = (1 - ALPHA) * cosS.current + ALPHA * Math.cos(rad);
-    const smoothed = ((Math.atan2(sinS.current, cosS.current) * 180 / Math.PI) + 360) % 360;
-    latest.current = smoothed;
-
-    // Stability: circular variance of last 15 readings
-    buf.current.push(raw);
-    if (buf.current.length > 15) buf.current.shift();
-    if (buf.current.length >= 10) {
-      const n = buf.current.length;
-      const sm = buf.current.reduce((s, h) => s + Math.sin(h * Math.PI / 180), 0) / n;
-      const cm = buf.current.reduce((s, h) => s + Math.cos(h * Math.PI / 180), 0) / n;
-      setStable(Math.sqrt(sm * sm + cm * cm) > 0.85);
-    }
-  }).current;
-
-  // RAF loop — direct DOM rotation, 60fps, zero React overhead
-  const loop = useRef(() => {
-    rafId.current = requestAnimationFrame(loop.current);
-    const h = latest.current;
-    if (h == null || !dialEl.current || !needleEl.current) return;
-
-    const dialAngle   = -h;
-    const needleAngle = ((targetBearingDeg - h) + 360) % 360;
-
-    // Only update DOM if value changed meaningfully (>0.3°)
-    if (Math.abs(dialAngle - prevDial.current) > 0.3) {
-      dialEl.current.style.transform   = `rotate(${dialAngle}deg)`;
-      prevDial.current = dialAngle;
-    }
-    if (Math.abs(needleAngle - prevNeedle.current) > 0.3) {
-      needleEl.current.style.transform = `rotate(${needleAngle}deg)`;
-      prevNeedle.current = needleAngle;
-    }
-
-    // Update React state for text display at low rate
-    if (!loop._t) loop._t = 0;
-    if (++loop._t % 8 === 0) setHeading(Math.round(h));
-  }).current;
-
-  const start = () => {
-    if (active.current) return;
-    active.current = true;
-    sinS.current = 0; cosS.current = 0;
-    buf.current = []; latest.current = null;
-
-    if ('ondeviceorientationabsolute' in window) {
-      window.addEventListener('deviceorientationabsolute', onEvent, true);
-    } else {
-      window.addEventListener('deviceorientation', onEvent, true);
-    }
-    rafId.current = requestAnimationFrame(loop);
-  };
-
-  const stop = () => {
-    active.current = false;
-    window.removeEventListener('deviceorientation', onEvent, true);
-    window.removeEventListener('deviceorientationabsolute', onEvent, true);
-    if (rafId.current) { cancelAnimationFrame(rafId.current); rafId.current = null; }
-  };
-
-  const enable = async () => {
+  const start = useCallback(async () => {
     setError(null);
-    const ok = await askPermission();
-    if (!ok) {
-      setError('Denied. Go to iOS Settings → Safari → Motion & Orientation → ON');
-      return;
-    }
-    setNeedPerm(false);
-    start();
-  };
+    const ok = await requestOrientationPermission();
+    if (!ok) { setError('Permission denied. Enable Motion & Orientation in iOS Settings → Safari.'); return; }
+    setPermitted(true);
+    window.addEventListener('deviceorientation', handleOrientation, true);
+  }, [handleOrientation]);
 
   useEffect(() => {
-    const isIOS = typeof DeviceOrientationEvent?.requestPermission === 'function';
-    if (isIOS) { setNeedPerm(true); }
-    else { start(); }
-    return stop;
-  }, []); // eslint-disable-line
+    // Android / desktop — auto start (no permission prompt needed)
+    if (typeof DeviceOrientationEvent === 'undefined' ||
+        typeof DeviceOrientationEvent.requestPermission !== 'function') {
+      start();
+    }
+    return () => window.removeEventListener('deviceorientation', handleOrientation, true);
+  }, [start, handleOrientation]);
 
-  // targetBearingDeg changes — update needle without re-attaching sensor
-  // (loop reads targetBearingDeg from closure — need to force re-render of loop)
-  // We handle this by making loop read from a ref
-  const targetRef = useRef(targetBearingDeg);
-  useEffect(() => { targetRef.current = targetBearingDeg; }, [targetBearingDeg]);
-
+  // Scroll lock when expanded
   useEffect(() => {
     if (!expanded) return;
-    const s = document.body.style;
-    const prev = { o: s.overflow, p: s.position, w: s.width };
-    s.overflow = 'hidden'; s.position = 'fixed'; s.width = '100%';
-    return () => { s.overflow = prev.o; s.position = prev.p; s.width = prev.w; };
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
   }, [expanded]);
+
+  const needleAngle = smoothHeading != null
+    ? ((targetBearingDeg - smoothHeading) + 360) % 360
+    : targetBearingDeg;
+
+  const { label, arrow } = getArrowLabel(needleAngle);
+
+  const distDisplay = parseFloat(distanceKm) < 1
+    ? `${(parseFloat(distanceKm) * 1000).toFixed(0)} m`
+    : `${parseFloat(distanceKm).toFixed(1)} km`;
 
   const close = () => setExpanded(false);
 
-  const needleAngle = heading != null
-    ? ((targetBearingDeg - heading) + 360) % 360
-    : 0;
-
-  const dist = parseFloat(distanceKm) < 1
-    ? `${(parseFloat(distanceKm) * 1000).toFixed(0)}m`
-    : `${parseFloat(distanceKm).toFixed(1)}km`;
-
-  const sz = typeof window !== 'undefined' ? Math.min(window.innerWidth - 48, 300) : 280;
-  const cx = sz / 2, R = cx - 6;
-
-  // Ticks
-  const ticks = Array.from({ length: 72 }, (_, i) => {
-    const deg = i * 5, rad = deg * Math.PI / 180;
-    const major = deg % 90 === 0, mid = deg % 45 === 0;
-    const r1 = major ? R * 0.60 : mid ? R * 0.68 : R * 0.74;
-    return {
-      x1: cx + r1 * Math.sin(rad),       y1: cx - r1 * Math.cos(rad),
-      x2: cx + R * 0.81 * Math.sin(rad), y2: cx - R * 0.81 * Math.cos(rad),
-      s: major ? '#6366f1' : mid ? '#475569' : '#1e293b',
-      w: major ? 3 : mid ? 1.5 : 0.8,
-    };
-  });
-
-  const cards = [
-    { l: 'N', d: 0,   c: '#f87171', fs: R * 0.15, fw: 900 },
-    { l: 'E', d: 90,  c: '#94a3b8', fs: R * 0.11, fw: 700 },
-    { l: 'S', d: 180, c: '#94a3b8', fs: R * 0.11, fw: 700 },
-    { l: 'W', d: 270, c: '#94a3b8', fs: R * 0.11, fw: 700 },
-  ];
-  const inter = [
-    { l: 'NE', d: 45 }, { l: 'SE', d: 135 },
-    { l: 'SW', d: 225 }, { l: 'NW', d: 315 },
-  ];
-  const lr = R * 0.88;
+  const isIOS = typeof DeviceOrientationEvent !== 'undefined' &&
+    typeof DeviceOrientationEvent.requestPermission === 'function';
 
   return (
     <>
-      {/* Pill */}
-      <button onClick={() => setExpanded(true)} style={{
-        width: '100%', display: 'flex', alignItems: 'center', gap: 12,
-        padding: '12px 16px', background: '#0f172a', border: '1px solid #334155',
-        borderRadius: 16, cursor: 'pointer',
-      }}>
-        <svg width="40" height="40" viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
-          <circle cx="20" cy="20" r="18" fill="#1e293b" stroke="#475569" strokeWidth="2" />
-          <g style={{ transformOrigin: '20px 20px', transform: `rotate(${needleAngle}deg)` }}>
-            <polygon points="20,4 22,20 20,17 18,20" fill="#ef4444" />
-            <polygon points="20,36 22,20 20,23 18,20" fill="#64748b" />
-          </g>
-          <circle cx="20" cy="20" r="3" fill="#e2e8f0" />
-        </svg>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ margin: 0, fontWeight: 900, fontSize: 14, color: 'white' }}>🧭 Live Compass</p>
-          <p style={{ margin: 0, fontSize: 10, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {heading != null ? getLabel(needleAngle) : 'Tap to open'} · {destName}
+      {/* ── Collapsed pill ── */}
+      <button
+        onClick={() => setExpanded(true)}
+        className="w-full flex items-center gap-3 px-4 py-3 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-2xl transition-all active:scale-[0.97] group"
+      >
+        {/* Mini compass preview */}
+        <div className="relative w-10 h-10 shrink-0">
+          <div className="absolute inset-0 rounded-full bg-slate-800 border-2 border-slate-600" />
+          <div className="absolute inset-0 flex items-center justify-center"
+            style={{ transform: `rotate(${needleAngle}deg)`, transition: 'transform 0.3s ease-out' }}>
+            <svg width="40" height="40" viewBox="0 0 40 40">
+              <polygon points="20,4 22,20 20,17 18,20" fill="#ef4444" />
+              <polygon points="20,36 22,20 20,23 18,20" fill="#475569" />
+            </svg>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-white border border-slate-500 z-10" />
+          </div>
+        </div>
+
+        <div className="flex-1 text-left min-w-0">
+          <p className="text-sm font-black text-white group-hover:text-indigo-300 transition-colors">
+            🧭 Live Compass
+          </p>
+          <p className="text-[10px] text-slate-400 truncate">
+            {smoothHeading != null ? `${arrow} ${label}` : 'Tap to open'} · {destName}
           </p>
         </div>
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <p style={{ margin: 0, fontWeight: 900, fontSize: 14, color: '#fbbf24' }}>{dist}</p>
-          <p style={{ margin: 0, fontSize: 9, color: '#64748b', fontWeight: 700 }}>tap to expand</p>
+
+        <div className="text-right shrink-0">
+          <p className="text-sm font-black text-amber-400">{distDisplay}</p>
+          <p className="text-[9px] text-slate-500 font-bold">tap to expand</p>
         </div>
       </button>
 
-      {/* Modal */}
+      {/* ── Fullscreen modal via portal ── */}
       {expanded && createPortal(
         <div style={{
-          position: 'fixed', inset: 0, zIndex: 999999, background: '#020617',
-          display: 'flex', flexDirection: 'column',
+          position: 'fixed', inset: 0, zIndex: 999999,
+          background: '#020617', display: 'flex', flexDirection: 'column',
           paddingTop: 'env(safe-area-inset-top)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
@@ -238,15 +216,22 @@ export default function LiveCompass({ targetBearingDeg, destName, distanceKm }) 
           {/* Header */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '14px 16px', borderBottom: '1px solid #1e293b', flexShrink: 0, gap: 8,
+            padding: '14px 16px', borderBottom: '1px solid #1e293b',
+            flexShrink: 0, gap: 8,
           }}>
             <div style={{ minWidth: 0, flex: 1 }}>
               <p style={{ margin: 0, fontWeight: 900, fontSize: 16, color: 'white' }}>🧭 Live Compass</p>
-              <p style={{ margin: 0, fontSize: 10, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>→ {destName}</p>
+              <p style={{ margin: 0, fontSize: 10, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                → {destName}
+              </p>
             </div>
             <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-              <button onClick={close} style={{ padding: '8px 14px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#cbd5e1', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>↕ Shrink</button>
-              <button onClick={close} style={{ padding: '8px 14px', background: '#dc2626', border: 'none', borderRadius: 10, color: 'white', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>✕ Close</button>
+              <button onClick={close} style={{ padding: '8px 14px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#cbd5e1', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                ↕ Shrink
+              </button>
+              <button onClick={close} style={{ padding: '8px 14px', background: '#dc2626', border: 'none', borderRadius: 10, color: 'white', fontWeight: 900, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                ✕ Close
+              </button>
             </div>
           </div>
 
@@ -256,9 +241,9 @@ export default function LiveCompass({ targetBearingDeg, destName, distanceKm }) 
             {/* Stats */}
             <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
               {[
-                { v: dist,                                                l: 'Distance', c: '#fbbf24' },
-                { v: `${Math.round(targetBearingDeg)}°`,                  l: 'Target',   c: '#818cf8' },
-                { v: heading != null ? `${heading}°` : '—',              l: 'Facing',   c: '#34d399' },
+                { v: distDisplay,                                           l: 'Distance', c: '#fbbf24' },
+                { v: `${Math.round(targetBearingDeg)}°`,                    l: 'Target',   c: '#818cf8' },
+                { v: smoothHeading != null ? `${Math.round(smoothHeading)}°` : '—', l: 'Facing', c: '#34d399' },
               ].map(({ v, l, c }, i, a) => (
                 <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
                   <div style={{ textAlign: 'center' }}>
@@ -270,73 +255,47 @@ export default function LiveCompass({ targetBearingDeg, destName, distanceKm }) 
               ))}
             </div>
 
-            {/* Status */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 20, background: '#0f172a', border: `1px solid ${stable ? '#34d39950' : '#fbbf2450'}` }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: stable ? '#34d399' : '#fbbf24', boxShadow: stable ? '0 0 6px #34d399' : 'none' }} />
-              <p style={{ margin: 0, fontSize: 11, color: stable ? '#34d399' : '#fbbf24', fontWeight: 700 }}>
-                {heading == null ? 'Waiting for sensor...' : stable ? 'Compass stable ✓' : 'Move phone in figure-8 ∞'}
-              </p>
-            </div>
-
-            {/* Compass SVG — dial and needle rotated via DOM refs */}
-            <svg width={sz} height={sz} viewBox={`0 0 ${sz} ${sz}`} style={{ display: 'block', flexShrink: 0 }}>
-              <circle cx={cx} cy={cx} r={R}        fill="#0f172a" stroke="#334155" strokeWidth="3" />
-              <circle cx={cx} cy={cx} r={R * 0.96} fill="none"   stroke="#1e293b" strokeWidth="1" />
-
-              {/* Rotating dial */}
-              <g ref={dialEl} style={{ transformOrigin: `${cx}px ${cx}px` }}>
-                {ticks.map((t, i) => (
-                  <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke={t.s} strokeWidth={t.w} strokeLinecap="round" />
-                ))}
-                {cards.map(({ l, d, c, fs, fw }) => {
-                  const rad = d * Math.PI / 180;
-                  return <text key={l} x={cx + lr * Math.sin(rad)} y={cx - lr * Math.cos(rad)} textAnchor="middle" dominantBaseline="central" fill={c} fontSize={fs} fontWeight={fw}>{l}</text>;
-                })}
-                {inter.map(({ l, d }) => {
-                  const rad = d * Math.PI / 180;
-                  return <text key={l} x={cx + lr * 0.90 * Math.sin(rad)} y={cx - lr * 0.90 * Math.cos(rad)} textAnchor="middle" dominantBaseline="central" fill="#475569" fontSize={R * 0.072} fontWeight="600">{l}</text>;
-                })}
-              </g>
-
-              {/* Needle */}
-              <g ref={needleEl} style={{ transformOrigin: `${cx}px ${cx}px` }}>
-                <polygon points={`${cx},${cx-R*0.52} ${cx+R*0.07},${cx-R*0.04} ${cx},${cx+R*0.06} ${cx-R*0.07},${cx-R*0.04}`} fill="#ef4444" />
-                <polygon points={`${cx},${cx+R*0.52} ${cx+R*0.07},${cx+R*0.04} ${cx},${cx-R*0.06} ${cx-R*0.07},${cx+R*0.04}`} fill="#64748b" />
-              </g>
-
-              <circle cx={cx} cy={cx} r={R * 0.055} fill="#e2e8f0" stroke="#64748b" strokeWidth="2" />
-              <circle cx={cx} cy={cx - R + 7} r={5} fill="#ef4444" />
-            </svg>
+            {/* Compass rose */}
+            <CompassRose
+              smoothHeading={smoothHeading}
+              needleAngle={needleAngle}
+              size={Math.min(window.innerWidth - 48, 300)}
+            />
 
             {/* Direction */}
-            <p style={{ margin: 0, fontSize: 26, fontWeight: 900, color: 'white', textAlign: 'center', minHeight: 34 }}>
-              {heading != null ? getLabel(needleAngle) : '—'}
-            </p>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ margin: 0, fontSize: 52, fontWeight: 900, color: 'white', lineHeight: 1 }}>{arrow}</p>
+              <p style={{ margin: '6px 0 0', fontSize: 18, fontWeight: 900, color: '#fbbf24' }}>{label}</p>
+              {smoothHeading == null && !error && (
+                <p style={{ margin: '6px 0 0', fontSize: 11, color: '#475569' }}>
+                  {isIOS && !permitted ? 'Tap "Enable Compass" below' : 'Move device in a figure-8 to calibrate...'}
+                </p>
+              )}
+            </div>
 
-            {/* iOS permission */}
-            {needPerm && (
-              <button onClick={enable} style={{ width: '100%', maxWidth: 280, padding: '14px 0', background: '#4f46e5', border: 'none', borderRadius: 14, color: 'white', fontWeight: 900, fontSize: 15, cursor: 'pointer' }}>
+            {/* iOS permission button */}
+            {isIOS && !permitted && (
+              <button onClick={start} style={{ width: '100%', maxWidth: 280, padding: '14px 0', background: '#4f46e5', border: 'none', borderRadius: 14, color: 'white', fontWeight: 900, fontSize: 15, cursor: 'pointer' }}>
                 Enable Compass (iOS)
               </button>
             )}
 
-            {error && <p style={{ fontSize: 12, color: '#f87171', fontWeight: 600, textAlign: 'center', margin: 0 }}>{error}</p>}
-
-            {!stable && heading != null && (
-              <div style={{ width: '100%', maxWidth: 280, padding: '12px 16px', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 12 }}>
-                <p style={{ margin: 0, fontSize: 13, fontWeight: 900, color: '#fbbf24' }}>∞ Calibration needed</p>
-                <p style={{ margin: '4px 0 0', fontSize: 11, color: '#92400e' }}>Hold phone flat and slowly trace a figure-8 in the air until the status turns green.</p>
-              </div>
+            {error && (
+              <p style={{ fontSize: 12, color: '#f87171', fontWeight: 600, textAlign: 'center', padding: '0 12px', margin: 0 }}>{error}</p>
             )}
 
-            <p style={{ margin: 0, fontSize: 10, color: '#1e293b', textAlign: 'center', maxWidth: 260 }}>
+            <p style={{ margin: 0, fontSize: 10, color: '#334155', textAlign: 'center', maxWidth: 260 }}>
               Red needle → destination · Rotate phone until needle points up ↑
             </p>
 
             {/* Bottom buttons */}
             <div style={{ display: 'flex', gap: 12, width: '100%', maxWidth: 280, paddingBottom: 4 }}>
-              <button onClick={close} style={{ flex: 1, padding: '13px 0', background: '#1e293b', border: '1px solid #334155', borderRadius: 14, color: '#cbd5e1', fontWeight: 900, fontSize: 14, cursor: 'pointer' }}>↕ Shrink</button>
-              <button onClick={close} style={{ flex: 1, padding: '13px 0', background: '#dc2626', border: 'none', borderRadius: 14, color: 'white', fontWeight: 900, fontSize: 14, cursor: 'pointer' }}>✕ Close</button>
+              <button onClick={close} style={{ flex: 1, padding: '13px 0', background: '#1e293b', border: '1px solid #334155', borderRadius: 14, color: '#cbd5e1', fontWeight: 900, fontSize: 14, cursor: 'pointer' }}>
+                ↕ Shrink
+              </button>
+              <button onClick={close} style={{ flex: 1, padding: '13px 0', background: '#dc2626', border: 'none', borderRadius: 14, color: 'white', fontWeight: 900, fontSize: 14, cursor: 'pointer' }}>
+                ✕ Close
+              </button>
             </div>
 
           </div>
