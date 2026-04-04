@@ -37,7 +37,7 @@ export default function HospitalList({
             <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
               <span className="text-xl">🏥</span>
             </div>
-            <h3 className="font-black text-xl text-white tracking-wide">Top Hospitals</h3>
+            <h3 className="font-black text-xl text-slate-800 dark:text-white tracking-wide">Top Hospitals</h3>
           </div>
 
           <div className="space-y-4">
@@ -51,8 +51,8 @@ export default function HospitalList({
                   onClick={() => onFacilitySelect(doc)}
                   className={`group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden
                     ${isSelected 
-                      ? 'bg-slate-800/80 border-indigo-400 shadow-[0_0_25px_rgba(99,102,241,0.25)] scale-[1.02]' 
-                      : 'bg-slate-900/60 border-slate-700/50 hover:bg-slate-800 hover:border-indigo-500/50 hover:shadow-[0_0_20px_rgba(99,102,241,0.15)] hover:-translate-y-1'
+                      ? 'bg-indigo-50 dark:bg-slate-800/80 border-indigo-400 shadow-[0_0_25px_rgba(99,102,241,0.25)] scale-[1.02]' 
+                      : 'bg-white/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-md dark:hover:shadow-[0_0_20px_rgba(99,102,241,0.15)] hover:-translate-y-1'
                     } backdrop-blur-xl`}
                 >
                   {/* Neon top accent */}
@@ -63,8 +63,8 @@ export default function HospitalList({
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
                           index === 0 
-                            ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.4)]' 
-                            : 'bg-slate-800 text-slate-400 border-slate-700'
+                            ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/50 shadow-sm dark:shadow-[0_0_10px_rgba(99,102,241,0.4)]' 
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                         }`}>
                           {doc.rankBadge}
                         </span>
@@ -73,13 +73,13 @@ export default function HospitalList({
                         )}
                       </div>
                       
-                      <h4 className="font-black text-white text-lg leading-tight group-hover:text-indigo-300 transition-colors">{doc.name}</h4>
-                      <p className="text-[11px] text-cyan-400 uppercase tracking-widest font-bold mt-1">{doc.specialty}</p>
+                      <h4 className="font-black text-slate-900 dark:text-white text-lg leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">{doc.name}</h4>
+                      <p className="text-[11px] text-cyan-600 dark:text-cyan-400 uppercase tracking-widest font-bold mt-1">{doc.specialty}</p>
                     </div>
                     
                     <div className="flex flex-col items-end shrink-0">
-                      <div className="bg-slate-950/80 rounded-xl px-3 py-2 border border-slate-700/50 text-center shadow-inner">
-                        <p className="font-black text-white text-lg">{doc.distance.toFixed(1)} <span className="text-[10px] text-slate-500 font-bold">km</span></p>
+                      <div className="bg-slate-50 dark:bg-slate-950/80 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700/50 text-center shadow-inner">
+                        <p className="font-black text-slate-800 dark:text-white text-lg">{doc.distance.toFixed(1)} <span className="text-[10px] text-slate-500 font-bold">km</span></p>
                       </div>
                     </div>
                   </div>
@@ -106,7 +106,7 @@ export default function HospitalList({
                         <a 
                           href={`tel:${doc.phone.replace(/ /g, '')}`} 
                           onClick={(e) => e.stopPropagation()}
-                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center transition-colors active:scale-95"
+                          className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center transition-colors active:scale-95"
                         >
                           📞
                         </a>
@@ -116,14 +116,14 @@ export default function HospitalList({
 
                   {/* Conditions */}
                   {doc.conditions && doc.conditions.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap gap-1.5 relative z-10">
+                    <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800/80 flex flex-wrap gap-1.5 relative z-10">
                       {doc.conditions.filter(c => requiredDoctorType?.toLowerCase().includes(c)).map(c => (
-                         <span key={`req-${c}`} className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                         <span key={`req-${c}`} className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-500/40 shadow-sm dark:shadow-[0_0_10px_rgba(6,182,212,0.2)]">
                            {c}
                          </span>
                       ))}
                       {doc.conditions.filter(c => !requiredDoctorType?.toLowerCase().includes(c)).slice(0, 3).map(c => (
-                        <span key={c} className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                        <span key={c} className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                           {c}
                         </span>
                       ))}
@@ -143,7 +143,7 @@ export default function HospitalList({
             <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
               <span className="text-xl">💊</span>
             </div>
-            <h3 className="font-black text-xl text-white tracking-wide">Nearby Pharmacies</h3>
+            <h3 className="font-black text-xl text-slate-800 dark:text-white tracking-wide">Nearby Pharmacies</h3>
           </div>
 
           <div className="space-y-4">
@@ -157,8 +157,8 @@ export default function HospitalList({
                   onClick={() => onFacilitySelect(p)}
                   className={`group relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden
                     ${isSelected 
-                      ? 'bg-slate-800/80 border-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.25)] scale-[1.02]' 
-                      : 'bg-slate-900/60 border-slate-700/50 hover:bg-slate-800 hover:border-emerald-500/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:-translate-y-1'
+                      ? 'bg-emerald-50 dark:bg-slate-800/80 border-emerald-400 shadow-md dark:shadow-[0_0_25px_rgba(16,185,129,0.25)] scale-[1.02]' 
+                      : 'bg-white/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:shadow-sm dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:-translate-y-1'
                     } backdrop-blur-xl`}
                 >
                   <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-400 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
@@ -167,13 +167,13 @@ export default function HospitalList({
                     <div className="flex-1 min-w-0 pr-3">
                       <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border mb-2 ${
                         index === 0 
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]' 
-                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                          ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/50 shadow-sm dark:shadow-[0_0_10px_rgba(16,185,129,0.3)]' 
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                       }`}>
                         {index === 0 ? 'Nearest First' : 'Option'}
                       </span>
                       
-                      <h4 className="font-black text-white text-lg leading-tight group-hover:text-emerald-300 transition-colors">{p.name}</h4>
+                      <h4 className="font-black text-slate-900 dark:text-white text-lg leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">{p.name}</h4>
                       
                       <div className="flex items-center gap-2 mt-2">
                         <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-full border ${
@@ -187,8 +187,8 @@ export default function HospitalList({
                     </div>
 
                     <div className="flex flex-col items-end shrink-0">
-                      <div className="bg-slate-950/80 rounded-xl px-3 py-2 border border-slate-700/50 text-center shadow-inner">
-                        <p className="font-black text-white text-lg">{p.distance.toFixed(1)} <span className="text-[10px] text-slate-500 font-bold">km</span></p>
+                      <div className="bg-slate-50 dark:bg-slate-950/80 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700/50 text-center shadow-inner">
+                        <p className="font-black text-slate-800 dark:text-white text-lg">{p.distance.toFixed(1)} <span className="text-[10px] text-slate-500 font-bold">km</span></p>
                       </div>
                     </div>
                   </div>
@@ -212,7 +212,7 @@ export default function HospitalList({
                         <a 
                           href={`tel:${p.phone.replace(/ /g, '')}`} 
                           onClick={(e) => e.stopPropagation()}
-                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center transition-colors active:scale-95"
+                          className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center transition-colors active:scale-95"
                         >
                           📞
                         </a>

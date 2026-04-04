@@ -157,22 +157,22 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950 pointer-events-none" />
-        <div className="w-16 h-16 border-4 border-indigo-900 border-t-indigo-500 rounded-full animate-spin shadow-[0_0_30px_rgba(99,102,241,0.5)]"></div>
-        <p className="mt-8 text-indigo-400 font-black tracking-[0.2em] uppercase text-sm animate-pulse">Initializing GPS Array...</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-100 dark:from-indigo-900/20 via-slate-50 dark:via-slate-950 to-slate-50 dark:to-slate-950 pointer-events-none" />
+        <div className="w-16 h-16 border-4 border-indigo-200 dark:border-indigo-900 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin shadow-[0_0_30px_rgba(99,102,241,0.5)]"></div>
+        <p className="mt-8 text-indigo-600 dark:text-indigo-400 font-black tracking-[0.2em] uppercase text-sm animate-pulse">Initializing GPS Array...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-950 h-[100dvh] font-sans text-slate-200 selection:bg-indigo-500/30 flex flex-col overflow-hidden">
+    <div className="bg-slate-50 dark:bg-slate-950 h-[100dvh] font-sans text-slate-800 dark:text-slate-200 selection:bg-indigo-500/30 flex flex-col overflow-hidden">
 
       {/* Global Header (Optional slim bar) */}
-      <div className="shrink-0 z-[5000] w-full bg-slate-950/80 backdrop-blur-xl border-b border-indigo-500/20 py-3 px-4 md:px-8 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      <div className="shrink-0 z-[5000] w-full bg-white/90 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200 dark:border-indigo-500/20 py-3 px-4 md:px-8 flex items-center justify-between shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         <button
           onClick={onBack}
-          className="group flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-bold text-sm transition-all bg-slate-900 hover:bg-slate-800 px-4 py-2 rounded-xl border border-slate-700/50 hover:border-indigo-500/30"
+          className="group flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-bold text-sm transition-all bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-500/30"
         >
           <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           Back
@@ -180,19 +180,19 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
 
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end mr-2">
-            <span className="text-xs font-black text-white uppercase tracking-wider">{showHospitals && showPharmacies ? 'All Facilities' : showHospitals ? 'Hospitals' : 'Pharmacies'}</span>
+            <span className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">{showHospitals && showPharmacies ? 'All Facilities' : showHospitals ? 'Hospitals' : 'Pharmacies'}</span>
             {requiredDoctorType && <span className="text-[10px] text-indigo-400 font-bold">{requiredDoctorType}</span>}
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-900 rounded-xl px-3 py-1.5 border border-slate-700/50">
-            <svg className="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+          <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 rounded-xl px-3 py-1.5 border border-slate-200 dark:border-slate-700/50">
+            <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
             <select
               value={selectedState}
               onChange={e => setSelectedState(e.target.value)}
-              className="bg-transparent text-xs font-bold text-slate-200 outline-none cursor-pointer appearance-none pr-4"
+              className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer appearance-none pr-4"
             >
               {ALL_STATES.filter(s => s !== 'Other').map(s => (
-                <option key={s} value={s} className="bg-slate-900">{s}</option>
+                <option key={s} value={s} className="bg-white dark:bg-slate-900">{s}</option>
               ))}
             </select>
           </div>
@@ -203,13 +203,13 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
       <div className="flex flex-col md:flex-row flex-1 relative max-w-[1920px] mx-auto w-full overflow-hidden">
 
         {/* Left Side: Map */}
-        <div className="w-full md:w-1/2 lg:w-[45%] h-[50vh] md:h-full flex flex-col p-4 lg:p-6 border-b md:border-b-0 md:border-r border-indigo-500/10 bg-slate-950 relative overflow-hidden shrink-0">
+        <div className="w-full md:w-1/2 lg:w-[45%] h-[50vh] md:h-full flex flex-col p-4 lg:p-6 border-b md:border-b-0 md:border-r border-slate-200 dark:border-indigo-500/10 bg-slate-50 dark:bg-slate-950 relative overflow-hidden shrink-0">
 
           {/* Subtle background glow behind map */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
 
           <div className="mb-4 text-center z-10 relative">
-            <p className="text-indigo-300/80 font-bold text-sm tracking-wide bg-indigo-950/30 px-4 py-1.5 rounded-full border border-indigo-500/20 inline-block">
+            <p className="text-indigo-600 dark:text-indigo-300/80 font-bold text-sm tracking-wide bg-indigo-50 dark:bg-indigo-950/30 px-4 py-1.5 rounded-full border border-indigo-200 dark:border-indigo-500/20 inline-block shadow-sm">
               📍 Click on map to drop pin for your location
             </p>
           </div>
@@ -247,23 +247,23 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
             )}
 
             {routeInfo && (
-              <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-xl border border-emerald-500/50 text-white px-5 py-3 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.3)] z-[500] flex items-center justify-center gap-5 w-[90%] max-w-sm transition-all duration-500">
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-emerald-500/50 text-slate-800 dark:text-white px-5 py-3 rounded-2xl shadow-lg dark:shadow-[0_0_30px_rgba(16,185,129,0.3)] z-[500] flex items-center justify-center gap-5 w-[90%] max-w-sm transition-all duration-500">
                 <div className="text-center flex-1 overflow-hidden">
-                  <p className="font-black text-sm truncate bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">{routeInfo.name}</p>
+                  <p className="font-black text-sm truncate bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-400">{routeInfo.name}</p>
                 </div>
-                <div className="w-px h-8 bg-slate-700/50 shrink-0"></div>
+                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
                 <div className="flex gap-4 shrink-0">
-                  <div className="text-center"><p className="text-[9px] uppercase font-bold text-slate-400 mb-0.5">Dist</p><p className="font-black text-sm">{routeInfo.distance} km</p></div>
-                  <div className="text-center"><p className="text-[9px] uppercase font-bold text-slate-400 mb-0.5">ETA</p><p className="font-black text-sm text-amber-400">~{routeInfo.duration}m</p></div>
+                  <div className="text-center"><p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">Dist</p><p className="font-black text-sm">{routeInfo.distance} km</p></div>
+                  <div className="text-center"><p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">ETA</p><p className="font-black text-sm text-amber-600 dark:text-amber-400">~{routeInfo.duration}m</p></div>
                 </div>
-                <button onClick={clearRoute} className="absolute -top-2 -right-2 bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/50 w-7 h-7 rounded-full text-xs font-black transition-colors flex items-center justify-center shadow-lg">✕</button>
+                <button onClick={clearRoute} className="absolute -top-2 -right-2 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-500/20 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 border border-slate-300 dark:border-slate-700 hover:border-red-400 dark:hover:border-red-500/50 w-7 h-7 rounded-full text-xs font-black transition-colors flex items-center justify-center shadow-md">✕</button>
               </div>
             )}
           </div>
         </div>
 
         {/* Right Side: Scrollable List */}
-        <div className="w-full md:w-1/2 lg:w-[55%] h-[50vh] md:h-full p-4 md:p-8 lg:px-12 bg-slate-950 pb-24 overflow-y-auto shrink-0 md:shrink">
+        <div className="w-full md:w-1/2 lg:w-[55%] h-[50vh] md:h-full p-4 md:p-8 lg:px-12 bg-slate-50 dark:bg-slate-950 pb-24 overflow-y-auto shrink-0 md:shrink">
           <HospitalList
             nearbyDocs={nearbyDocs}
             showHospitals={showHospitals}
