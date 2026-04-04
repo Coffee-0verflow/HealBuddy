@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { doctors } from '../data/doctors';
 import { pharmacies } from '../data/pharmacies';
 import { getCurrentLocation, getDistanceInKm } from '../logic/distance';
+import { offlineRoute } from '../logic/offlineRouter';
 
 import MapSection from './MapSection';
 import HospitalList from './HospitalList';
@@ -61,6 +62,7 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
   const [errorMsg, setErrorMsg] = useState('');
   const [routeCoords, setRouteCoords] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
+  const [routeSteps, setRouteSteps] = useState(null);
   const [routeLoading, setRouteLoading] = useState(false);
   const [selectedState, setSelectedState] = useState('All States');
   const [selectedFacility, setSelectedFacility] = useState(null);
@@ -135,25 +137,44 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
     if (!userLocation) return;
     setRouteLoading(true);
     setSelectedFacility(doc);
+    setRouteSteps(null);
+
+    // Offline: use pure JS router instantly, no network needed
+    if (!navigator.onLine) {
+      const result = offlineRoute(userLocation.lat, userLocation.lng, doc.lat, doc.lng, doc.name);
+      setRouteCoords(result.coords);
+      setRouteInfo({ name: doc.name, distance: result.distance, duration: result.duration, offline: true, compassDir: result.compassDir, bearingDeg: result.bearingDeg });
+      setRouteSteps(result.steps);
+      setRouteLoading(false);
+      return;
+    }
+
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6000);
       const url = `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${doc.lng},${doc.lat}?overview=full&geometries=geojson`;
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
       const data = await res.json();
       if (data.code === 'Ok' && data.routes?.length > 0) {
         const route = data.routes[0];
         const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
         setRouteCoords(coords);
-        setRouteInfo({ name: doc.name, distance: (route.distance / 1000).toFixed(1), duration: Math.ceil(route.duration / 60) });
+        setRouteInfo({ name: doc.name, distance: (route.distance / 1000).toFixed(1), duration: String(Math.ceil(route.duration / 60)), offline: false });
+        setRouteSteps(null);
       } else throw new Error('No route');
     } catch {
-      setRouteCoords([[userLocation.lat, userLocation.lng], [doc.lat, doc.lng]]);
-      setRouteInfo({ name: doc.name, distance: doc.distance?.toFixed(1) || '0.0', duration: Math.ceil(doc.distance / 40 * 60) });
+      // Network failed mid-session — fall back to offline router
+      const result = offlineRoute(userLocation.lat, userLocation.lng, doc.lat, doc.lng, doc.name);
+      setRouteCoords(result.coords);
+      setRouteInfo({ name: doc.name, distance: result.distance, duration: result.duration, offline: true, compassDir: result.compassDir, bearingDeg: result.bearingDeg });
+      setRouteSteps(result.steps);
     } finally {
       setRouteLoading(false);
     }
   };
 
-  const clearRoute = () => { setRouteCoords(null); setRouteInfo(null); };
+  const clearRoute = () => { setRouteCoords(null); setRouteInfo(null); setRouteSteps(null); };
 
   if (loading) {
     return (
@@ -247,16 +268,23 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
             )}
 
             {routeInfo && (
-              <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-emerald-500/50 text-slate-800 dark:text-white px-5 py-3 rounded-2xl shadow-lg dark:shadow-[0_0_30px_rgba(16,185,129,0.3)] z-[500] flex items-center justify-center gap-5 w-[90%] max-w-sm transition-all duration-500">
-                <div className="text-center flex-1 overflow-hidden">
-                  <p className="font-black text-sm truncate bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-400">{routeInfo.name}</p>
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-emerald-500/50 text-slate-800 dark:text-white px-5 py-3 rounded-2xl shadow-lg dark:shadow-[0_0_30px_rgba(16,185,129,0.3)] z-[500] flex flex-col items-center gap-2 w-[90%] max-w-sm transition-all duration-500">
+                <div className="flex items-center justify-center gap-5 w-full">
+                  <div className="text-center flex-1 overflow-hidden">
+                    <p className="font-black text-sm truncate bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-400">{routeInfo.name}</p>
+                    {routeInfo.offline && (
+                      <p className="text-[9px] text-amber-500 font-bold uppercase tracking-wider">
+                        {routeInfo.compassDir ? `🧭 Head ${routeInfo.compassDir}` : '⚡ Offline directions'}
+                      </p>
+                    )}
+                  </div>
+                  <div className="w-px h-8 bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
+                  <div className="flex gap-4 shrink-0">
+                    <div className="text-center"><p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">Dist</p><p className="font-black text-sm">{routeInfo.distance} km</p></div>
+                    <div className="text-center"><p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">ETA</p><p className="font-black text-sm text-amber-600 dark:text-amber-400">~{routeInfo.duration}m</p></div>
+                  </div>
+                  <button onClick={clearRoute} className="absolute -top-2 -right-2 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-500/20 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 border border-slate-300 dark:border-slate-700 hover:border-red-400 dark:hover:border-red-500/50 w-7 h-7 rounded-full text-xs font-black transition-colors flex items-center justify-center shadow-md">✕</button>
                 </div>
-                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
-                <div className="flex gap-4 shrink-0">
-                  <div className="text-center"><p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">Dist</p><p className="font-black text-sm">{routeInfo.distance} km</p></div>
-                  <div className="text-center"><p className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 mb-0.5">ETA</p><p className="font-black text-sm text-amber-600 dark:text-amber-400">~{routeInfo.duration}m</p></div>
-                </div>
-                <button onClick={clearRoute} className="absolute -top-2 -right-2 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-500/20 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 border border-slate-300 dark:border-slate-700 hover:border-red-400 dark:hover:border-red-500/50 w-7 h-7 rounded-full text-xs font-black transition-colors flex items-center justify-center shadow-md">✕</button>
               </div>
             )}
           </div>
@@ -264,6 +292,38 @@ export default function MapScreen({ onBack, requiredDoctorType, showPharmacies =
 
         {/* Right Side: Scrollable List */}
         <div className="w-full md:w-1/2 lg:w-[55%] h-[50vh] md:h-full p-4 md:p-8 lg:px-12 bg-slate-50 dark:bg-slate-950 pb-24 overflow-y-auto shrink-0 md:shrink">
+
+          {/* Offline step-by-step directions panel */}
+          {routeSteps && routeInfo?.offline && (
+            <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-2xl overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 bg-amber-100 dark:bg-amber-900/40 border-b border-amber-200 dark:border-amber-700/50">
+                <span className="text-lg">🧭</span>
+                <div className="flex-1">
+                  <p className="font-black text-sm text-amber-900 dark:text-amber-200">Offline Directions</p>
+                  <p className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">Compass-based — works without internet or downloaded maps</p>
+                </div>
+                <div className="text-center shrink-0">
+                  <p className="font-black text-lg text-amber-800 dark:text-amber-300">{routeInfo.distance} km</p>
+                  <p className="text-[9px] text-amber-600 dark:text-amber-500 font-bold">~{routeInfo.duration} min</p>
+                </div>
+              </div>
+              <div className="px-4 py-3 space-y-2">
+                {routeSteps.map((step, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="flex flex-col items-center shrink-0">
+                      <span className="text-base">{step.icon}</span>
+                      {i < routeSteps.length - 1 && <div className="w-px h-4 bg-amber-200 dark:bg-amber-700 mt-1" />}
+                    </div>
+                    <p className="text-xs font-semibold text-amber-900 dark:text-amber-200 pt-0.5 leading-relaxed">{step.text}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="px-4 py-2 border-t border-amber-200 dark:border-amber-700/50">
+                <p className="text-[10px] text-amber-600 dark:text-amber-500 font-medium">⚠️ Directions are approximate. Follow road signs and use your best judgment.</p>
+              </div>
+            </div>
+          )}
+
           <HospitalList
             nearbyDocs={nearbyDocs}
             showHospitals={showHospitals}
