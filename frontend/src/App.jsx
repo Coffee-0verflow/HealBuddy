@@ -282,7 +282,17 @@ export default function App() {
   const activeTab = screen === 'dashboard' ? 'dashboard' : screen === 'map' ? 'hospitals' : screen === 'pharmacy' ? 'pharmacy' : screen === 'firstaid' ? 'firstaid' : screen === 'language' ? 'language' : 'guidance';
 
   return (
-    <div className="h-[100dvh] bg-white dark:bg-black flex flex-col font-sans overflow-hidden">
+    <div className="h-[100dvh] bg-white dark:bg-black flex flex-col font-sans overflow-hidden relative">
+      {/* Ambulance Siren Light Background */}
+      <div className="ambulance-bg">
+        <div className="light-orb orb-red-1" />
+        <div className="light-orb orb-blue-1" />
+        <div className="light-orb orb-red-2" />
+        <div className="light-orb orb-blue-2" />
+        <div className="light-orb orb-red-3" />
+        <div className="light-orb orb-blue-3" />
+      </div>
+
       <OfflineBanner />
       
       {/* Navbar */}

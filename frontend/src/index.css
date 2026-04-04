@@ -82,3 +82,150 @@
 .nav-item-inactive:hover {
   background-color: var(--bg-elevated);
 }
+
+/* ── Ambulance Siren Light Background ── */
+
+.ambulance-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Individual light orbs */
+.ambulance-bg .light-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  will-change: transform, opacity;
+}
+
+/* Red orb 1 — large, sweeps left to right */
+.ambulance-bg .orb-red-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.7) 0%, rgba(220, 38, 38, 0.3) 40%, transparent 70%);
+  top: -15%;
+  left: -20%;
+  animation: sweep-right 7s ease-in-out infinite, pulse-glow 3s ease-in-out infinite;
+}
+
+/* Blue orb 1 — large, sweeps right to left */
+.ambulance-bg .orb-blue-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.7) 0%, rgba(37, 99, 235, 0.3) 40%, transparent 70%);
+  bottom: -15%;
+  right: -20%;
+  animation: sweep-left 7s ease-in-out infinite, pulse-glow 3s ease-in-out infinite 1.5s;
+}
+
+/* Red orb 2 — medium, diagonal sweep */
+.ambulance-bg .orb-red-2 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(248, 113, 113, 0.6) 0%, rgba(239, 68, 68, 0.2) 50%, transparent 70%);
+  top: 30%;
+  right: -10%;
+  animation: sweep-diagonal 9s ease-in-out infinite 1s, pulse-glow 4s ease-in-out infinite 0.5s;
+}
+
+/* Blue orb 2 — medium, diagonal sweep opposite */
+.ambulance-bg .orb-blue-2 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.6) 0%, rgba(59, 130, 246, 0.2) 50%, transparent 70%);
+  bottom: 25%;
+  left: -10%;
+  animation: sweep-diagonal-reverse 9s ease-in-out infinite 1s, pulse-glow 4s ease-in-out infinite 2s;
+}
+
+/* Red orb 3 — small accent */
+.ambulance-bg .orb-red-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.5) 0%, transparent 60%);
+  top: 15%;
+  left: 25%;
+  animation: float-around 12s ease-in-out infinite 2s, pulse-glow 2.5s ease-in-out infinite 1s;
+}
+
+/* Blue orb 3 — small accent */
+.ambulance-bg .orb-blue-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, transparent 60%);
+  bottom: 15%;
+  right: 25%;
+  animation: float-around-reverse 12s ease-in-out infinite 2s, pulse-glow 2.5s ease-in-out infinite 2.5s;
+}
+
+/* ── Keyframes ── */
+
+@keyframes sweep-right {
+  0%   { transform: translateX(-40%) translateY(0%) scale(1); }
+  50%  { transform: translateX(100vw) translateY(15%) scale(1.15); }
+  100% { transform: translateX(-40%) translateY(0%) scale(1); }
+}
+
+@keyframes sweep-left {
+  0%   { transform: translateX(40%) translateY(0%) scale(1); }
+  50%  { transform: translateX(-100vw) translateY(-15%) scale(1.15); }
+  100% { transform: translateX(40%) translateY(0%) scale(1); }
+}
+
+@keyframes sweep-diagonal {
+  0%   { transform: translate(0%, 0%) scale(1); }
+  25%  { transform: translate(-50vw, -25vh) scale(1.1); }
+  50%  { transform: translate(-70vw, 10vh) scale(0.9); }
+  75%  { transform: translate(-25vw, 35vh) scale(1.1); }
+  100% { transform: translate(0%, 0%) scale(1); }
+}
+
+@keyframes sweep-diagonal-reverse {
+  0%   { transform: translate(0%, 0%) scale(1); }
+  25%  { transform: translate(50vw, 25vh) scale(1.1); }
+  50%  { transform: translate(70vw, -10vh) scale(0.9); }
+  75%  { transform: translate(25vw, -35vh) scale(1.1); }
+  100% { transform: translate(0%, 0%) scale(1); }
+}
+
+@keyframes float-around {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(25vw, -10vh) scale(1.1); }
+  50%  { transform: translate(45vw, 15vh) scale(0.95); }
+  75%  { transform: translate(-15vw, 25vh) scale(1.1); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes float-around-reverse {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(-25vw, 10vh) scale(1.1); }
+  50%  { transform: translate(-45vw, -15vh) scale(0.95); }
+  75%  { transform: translate(15vw, -25vh) scale(1.1); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 0.85; }
+}
+
+/* Light mode: softer blend */
+:root .ambulance-bg {
+  mix-blend-mode: soft-light;
+}
+
+/* Dark mode: screen blend projects light onto dark surfaces + more vivid */
+.dark .ambulance-bg {
+  mix-blend-mode: screen;
+}
+.dark .ambulance-bg .light-orb { filter: blur(110px); }
+.dark .ambulance-bg .orb-red-1  { background: radial-gradient(circle, rgba(239, 68, 68, 0.85) 0%, rgba(220, 38, 38, 0.4) 40%, transparent 70%); }
+.dark .ambulance-bg .orb-blue-1 { background: radial-gradient(circle, rgba(59, 130, 246, 0.85) 0%, rgba(37, 99, 235, 0.4) 40%, transparent 70%); }
+.dark .ambulance-bg .orb-red-2  { background: radial-gradient(circle, rgba(248, 113, 113, 0.7) 0%, rgba(239, 68, 68, 0.25) 50%, transparent 70%); }
+.dark .ambulance-bg .orb-blue-2 { background: radial-gradient(circle, rgba(96, 165, 250, 0.7) 0%, rgba(59, 130, 246, 0.25) 50%, transparent 70%); }
+.dark .ambulance-bg .orb-red-3  { background: radial-gradient(circle, rgba(239, 68, 68, 0.6) 0%, transparent 60%); }
+.dark .ambulance-bg .orb-blue-3 { background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, transparent 60%); }
