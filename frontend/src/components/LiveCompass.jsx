@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 async function requestOrientationPermission() {
   if (typeof DeviceOrientationEvent !== 'undefined' &&
@@ -278,8 +279,8 @@ export default function LiveCompass({ targetBearingDeg, destName, distanceKm }) 
       </button>
 
       {/* ── Fullscreen modal ── */}
-      {expanded && (
-        <div className="fixed inset-0 z-[9999] bg-slate-950 flex flex-col">
+      {expanded && createPortal(
+        <div className="fixed inset-0 z-[99999] bg-slate-950 flex flex-col" style={{position:'fixed',top:0,left:0,right:0,bottom:0}}>
 
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 shrink-0">
@@ -411,7 +412,7 @@ export default function LiveCompass({ targetBearingDeg, destName, distanceKm }) 
 
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 }
