@@ -5,6 +5,7 @@ import Guidance from './components/Guidance';
 import MapScreen from './components/MapScreen';
 import FirstAid from './components/FirstAid';
 import LanguageScreen from './components/LanguageScreen';
+import InstallPrompt from './components/InstallPrompt';
 
 const SYMPTOM_ICONS = {
   "Fever": "🌡️",
@@ -294,6 +295,7 @@ export default function App() {
       </div>
 
       <OfflineBanner />
+      <InstallPrompt />
       
       {/* Navbar */}
       <header className="bg-white dark:bg-slate-900 text-slate-800 dark:text-white flex items-center shrink-0 px-4 md:px-8 z-50 sticky top-0 border-b border-slate-200 dark:border-slate-700/50 shadow-sm">
