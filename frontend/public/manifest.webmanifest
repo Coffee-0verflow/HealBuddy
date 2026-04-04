@@ -1,0 +1,15 @@
+{
+  "short_name": "HealBuddy",
+  "name": "HealBuddy Offline Emergency Assistant",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0d9488",
+  "background_color": "#ffffff"
+}
